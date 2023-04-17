@@ -1,0 +1,20 @@
+{
+  "name": "todolist",
+  "version": "1.0.0",
+  "description": "仿照Microsoft To Do 个人练习",
+  "main": "index.js",
+  "scripts": {
+    "web:dev":"cd packages/web & npm run dev",
+    "serve:dev":"cd packages/server & npm run dev",
+    "db:start": "docker-compose up -d redis mongo mongo-express",
+    "db:stop": "docker-compose down",
+    "db:dump": "docker-compose exec mongo mongodump --db todolist --out /dump/init",
+    "db:restore": "docker-compose exec mongo mongorestore --db todolist /dump/init/todolist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.9.3"
+  }
+}
