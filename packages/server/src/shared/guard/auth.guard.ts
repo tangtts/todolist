@@ -1,4 +1,4 @@
-import { jwtSecret } from './../constants';
+import { jwtSecret } from '../../constants';
 
 import {
   CanActivate,

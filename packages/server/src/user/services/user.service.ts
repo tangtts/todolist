@@ -8,6 +8,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   UseGuards,
+  HttpStatus,
 } from "@nestjs/common";
 import { MongoRepository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -46,6 +47,7 @@ export default class UserService {
     u.phoneNumber = user.phoneNumber;
     u.avatar = "";
     u.taskList = [];
+    u.nickName = user.nickName
     return this.userRepository.save(u);
   }
 
@@ -60,10 +62,8 @@ export default class UserService {
     // 生成token
     const token = await this.certificate(user);
     return {
-      data: {
-        token,
-      },
-    };
+      token
+    }
   }
 
   /**
@@ -74,11 +74,11 @@ export default class UserService {
    * @return {{Promise<UserEntity>}} 用户信息
    */
   async info(id: string) {
-    if (!this.findOneBy({ _id: ObjectId(id) })) {
+    if (!await this.findOneBy({ _id: ObjectId(id) })) {
       return new NotFoundException("用户不存在！");
     }
     const user = await this.userRepository.findOneBy(id);
-    return user;
+    return user
   }
 
   /**
@@ -126,7 +126,7 @@ export default class UserService {
 
   async uploadAvatar(file) {
     const { url } = await this.uploadService.upload(file);
-    return { data: "http://localhost:3000/" + url };
+    return { data: "http://localhost:3000" + url };
   }
 
   /**

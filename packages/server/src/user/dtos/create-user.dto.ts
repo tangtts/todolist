@@ -2,7 +2,7 @@
 
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString, Length, Matches, Validate} from "class-validator"
-import { IsConfirmed } from "src/rules/isSamePassword.rule";
+import { IsConfirmed } from "src/shared/rules/isSamePassword.rule";
 export class CreateUserDTO {
 
   @ApiProperty({example:"好大鸭"})

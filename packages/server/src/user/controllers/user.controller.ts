@@ -27,7 +27,7 @@ import {
 } from "@nestjs/swagger";
 import UserService from "../services/user.service";
 import { LoginDTO } from "../dtos/login-user.dto";
-import { AuthGuard } from "src/guard/auth.guard";
+import { AuthGuard } from "src/shared/guard/auth.guard";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UploadDTO } from "../dtos/upload.dto";
 import { UpdateUserDTO } from "../dtos/update-user.dto";
