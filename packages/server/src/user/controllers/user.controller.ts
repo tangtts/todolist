@@ -1,3 +1,4 @@
+import { TaskItemDTO } from './../dtos/task-item.dto';
 import { CreateUserDTO } from "./../dtos/create-user.dto";
 import {
   Body,
@@ -31,6 +32,7 @@ import { AuthGuard } from "src/shared/guard/auth.guard";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UploadDTO } from "../dtos/upload.dto";
 import { UpdateUserDTO } from "../dtos/update-user.dto";
+import { SearchUserDTO } from '../dtos/search-user.dto';
 @ApiTags("用户模块")
 @Controller("user")
 export default class UserController {
@@ -66,6 +68,14 @@ export default class UserController {
     return this.userService.info(req.user.id);
   }
 
+  /**
+   *
+   * @description 更新用户
+   * @param {*} req
+   * @param {UpdateUserDTO} updateUserDTO
+   * @return {*} 
+   * @memberof UserController
+   */
   @ApiBearerAuth("JWT")
   @ApiOperation({
     summary: "更新用户",
@@ -77,6 +87,68 @@ export default class UserController {
     // let  id: string = "643c0d94cd563ce5cc22455c";
     return this.userService.update(token, updateUserDTO);
   }
+
+  /**
+   *
+   * @description 添加任务列表
+   * @param {*} req
+   * @param {TaskItemDTO} updateUserDTO
+   * @return {*} 
+   * @memberof UserController
+   */
+  @ApiBearerAuth("JWT")
+  @ApiOperation({
+    summary: "添加任务列表",
+  })
+  @Post('addTaskItem')
+  @UseGuards(AuthGuard)
+  addTaskItem(@Request() req, @Body() updateUserDTO: TaskItemDTO) {
+    const token = req.user.id
+    return this.userService.addTaskItem(token, updateUserDTO);
+  }
+
+  /**
+   *
+   * @desription 修改任务列表
+   * @param {*} req
+   * @param {TaskItemDTO} updateUserDTO
+   * @return {*} 
+   * @memberof UserController
+   */
+  @ApiBearerAuth("JWT")
+  @ApiOperation({
+    summary: "修改任务列表",
+  })
+  @Post('updateTaskItem')
+  @UseGuards(AuthGuard)
+  updateTaskItem(@Request() req, @Body() updateUserDTO: TaskItemDTO) {
+    const token = req.user.id
+    return this.userService.updateTaskItem(token, updateUserDTO);
+  }
+
+    /**
+   *
+   * @desription 修改任务列表
+   * @param {*} req
+   * @param {TaskItemDTO} updateUserDTO
+   * @return {*} 
+   * @memberof UserController
+   */
+     @ApiBearerAuth("JWT")
+     @ApiOperation({
+       summary: "修改任务列表",
+     })
+     @Post('searchTaskItem')
+     @UseGuards(AuthGuard)
+     searchTaskItem(@Request() req, @Body() searchUserDTO: SearchUserDTO) {
+       const token = req.user.id
+       return this.userService.searchTask(token, searchUserDTO);
+     }
+
+
+
+
+
 
   @ApiOperation({
     summary: "上传头像",

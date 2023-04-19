@@ -1,3 +1,4 @@
+import { SearchUserDTO } from "./../dtos/search-user.dto";
 import { UpdateUserDTO } from "./../dtos/update-user.dto";
 import { UserEntity } from "src/user/entities/user.entity";
 import { CreateUserDTO } from "./../dtos/create-user.dto";
@@ -17,6 +18,8 @@ import { LoginDTO } from "../dtos/login-user.dto";
 import { JwtService } from "@nestjs/jwt";
 import { UploadService } from "src/shared/upload/upload.service";
 import { deleteProperty } from "src/shared/utils/deleteNoUserdProperty";
+import { TaskItemDTO } from "../dtos/task-item.dto";
+import { HttpErrorByCode } from "@nestjs/common/utils/http-error-by-code.util";
 @Injectable()
 export default class UserService {
   constructor(
@@ -47,7 +50,7 @@ export default class UserService {
     u.phoneNumber = user.phoneNumber;
     u.avatar = "";
     u.taskList = [];
-    u.nickName = user.nickName
+    u.nickName = user.nickName;
     return this.userRepository.save(u);
   }
 
@@ -62,8 +65,8 @@ export default class UserService {
     // 生成token
     const token = await this.certificate(user);
     return {
-      token
-    }
+      token,
+    };
   }
 
   /**
@@ -74,11 +77,11 @@ export default class UserService {
    * @return {{Promise<UserEntity>}} 用户信息
    */
   async info(id: string) {
-    if (!await this.findOneBy({ _id: ObjectId(id) })) {
+    if (!(await this.findOneBy({ _id: ObjectId(id) }))) {
       return new NotFoundException("用户不存在！");
     }
     const user = await this.userRepository.findOneBy(id);
-    return user
+    return user;
   }
 
   /**
@@ -115,6 +118,55 @@ export default class UserService {
 
   /**
    *
+   * @description 添加侧边栏任务
+   * @param {string} id
+   * @param {TaskItemDTO} todoItem
+   * @memberof UserService
+   */
+  async addTaskItem(id: string, todoItem: TaskItemDTO) {
+    deleteProperty(["id"], todoItem);
+    let findUser = await this.findOneBy({ _id: ObjectId(id) });
+    // 产生唯一id
+    todoItem.id = Date.now();
+    findUser.taskList.push(todoItem);
+    await this.update(id, findUser);
+    return findUser.taskList;
+  }
+
+  /**
+   *
+   * @description 修改侧边栏任务
+   * @param {string} id
+   * @param {TaskItemDTO} todoItem
+   * @memberof UserService
+   */
+  async updateTaskItem(id: string, todoItem: TaskItemDTO) {
+    let findUser = await this.findOneBy({ _id: ObjectId(id) });
+    findUser.taskList = findUser.taskList.map(task => {
+      if (task.id == todoItem.id) {
+        return {
+          ...task,
+          ...todoItem,
+        };
+      } else {
+        return task;
+      }
+    });
+
+    await this.userRepository.update(id, findUser);
+
+    return findUser.taskList;
+  }
+
+  async searchTask(id: string, searchUserDTO: SearchUserDTO) {
+    let findUser = await this.findOneBy({ _id: ObjectId(id) });
+    return findUser.taskList.filter(task => {
+      return new RegExp(searchUserDTO.taskName).test(task.txt);
+    });
+  }
+
+  /**
+   *
    *
    * @param {object} params
    * @return {*}
@@ -124,6 +176,13 @@ export default class UserService {
     return this.userRepository.findOneBy(params);
   }
 
+  /**
+   *
+   * @description 上传图片，返回本地图片链接
+   * @param {*} file
+   * @return {object} {data:图片url}
+   * @memberof UserService
+   */
   async uploadAvatar(file) {
     const { url } = await this.uploadService.upload(file);
     return { data: "http://localhost:3000" + url };

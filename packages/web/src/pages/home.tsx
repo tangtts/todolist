@@ -1,54 +1,95 @@
 
 import { Layout, Divider, List, Skeleton } from "antd"
 import Header from "./components/header"
-import SideItem, { ISideItem } from "./components/item"
+import SideItem from "./components/item"
 import { StarOutlined, AlertOutlined, PlusOutlined } from "@ant-design/icons"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Content from "./components/main"
 import { useRequest } from 'ahooks'
 import Mock from 'mockjs';
 import React from "react"
+import { fetchAddTaskItem, fetchInfo, fetchSearchTaskItem, fetchUpdateTaskItem } from "../request/user"
+import { InfoResponse, ISideItem } from "../types"
+import Search from "antd/es/input/Search"
 
 function Home() {
-  interface ITaskSideItem extends ISideItem {
-    id: string | number
-  }
-  function createTask() {
-    return ({
-      id: Mock.mock("@id"),
-      txt: Mock.mock('@name'),
-      num: Mock.mock("@increment")
+
+
+  // function createTask() {
+  //   return ({
+  //     id: Mock.mock("@id"),
+  //     txt: Mock.mock('@name'),
+  //     num: Mock.mock("@increment")
+  //   })
+  // }
+
+  // function getUsername(): Promise<ITaskSideItem[]> {
+  //   let data: ITaskSideItem[] = []
+  //   return new Promise((resolve) => {
+  //     Array.from({ length: 3 }).forEach(() => {
+  //       data.push(createTask())
+  //     })
+  //     resolve(data)
+  //   });
+  // }
+  // useRequest(getUsername, {
+  //   onSuccess: (result) => {
+  //     setSideTodoList(result)
+  //   }
+  // });
+
+  const [info, setInfo] = useState<InfoResponse['data']>()
+
+  useEffect(() => {
+    fetchInfo().then(res => {
+      if (res) {
+        setInfo(res.data)
+        setSideTodoList(res.data.taskList)
+        console.log(res.data)
+      }
+    })
+  }, [])
+
+
+
+
+  const [sideTodoList, setSideTodoList] = useState<ISideItem[]>([]);
+  const index = useRef(0)
+  const addList = () => {
+    let o: ISideItem = {
+      id: Date.now(),
+      txt: `任务列表${index.current++}`,
+      num: 0
+    }
+    fetchAddTaskItem(o).then(res => {
+      setSideTodoList([...res.data])
     })
   }
 
-  function getUsername(): Promise<ITaskSideItem[]> {
-    let data: ITaskSideItem[] = []
-    return new Promise((resolve) => {
-      Array.from({ length: 3 }).forEach(() => {
-        data.push(createTask())
-      })
-      resolve(data)
-    });
-  }
-  useRequest(getUsername, {
-    onSuccess: (result) => {
-      setSideTodoList(result)
-    }
-  });
-
-  const [sideTodoList, setSideTodoList] = useState<ITaskSideItem[]>([]);
-
-  const addList = () => {
-    let temp: ITaskSideItem = createTask()
-    setSideTodoList([...sideTodoList, temp])
+  const updateItemTxt = (id, txt) => {
+    let temp = sideTodoList.find(item => item.id == id)
+    temp && (temp.txt = txt);
+    fetchUpdateTaskItem(temp).then(res => {
+      setSideTodoList(res.data)
+    })
   }
 
+  const onSearch = (taskName: string) => {
+    fetchSearchTaskItem({taskName}).then(res=>{
+      setSideTodoList(res.data)
+    })
+  };
 
   return <div className="h-full flex">
     <div
       className="w-30 bg-gray-100 py-10 px-4 relative"
     >
-      <Header></Header>
+      <Header info={info}></Header>
+      <Search placeholder="input search text"
+        size="large"
+        allowClear
+        onSearch={onSearch}
+      />
       <Divider className="my-4 border-t-2 border-cyan-300"></Divider>
       <div>
         <SideItem txt={'重要'} icon={<StarOutlined />} num={10}></SideItem>
@@ -59,9 +100,10 @@ function Home() {
         {
           sideTodoList?.map(side => {
             return <SideItem
-              txt={side.txt}
               key={side.id}
-              num={side.num} />
+              updateItemTxt={updateItemTxt}
+              {...side}
+            />
           })
         }
       </div>

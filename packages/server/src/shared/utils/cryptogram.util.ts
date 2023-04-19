@@ -10,6 +10,7 @@ export function makeSalt(len = 3){
   return crypto.randomBytes(len).toString('base64')
 }
 
+
 /**
  *
  *

@@ -14,11 +14,7 @@ import {
   PrimaryColumn,
   ObjectID
 } from "typeorm";
-type Task = {
-  id:number,
-  taskName:string
-}
-
+import { TaskItemDTO } from "../dtos/task-item.dto";
 @Entity('users')
 export class UserEntity extends CommonEntity{
 
@@ -42,7 +38,7 @@ export class UserEntity extends CommonEntity{
   avatar:string
 
   @Column({type: 'json', nullable: true})
-  taskList:Task[]
+  taskList:TaskItemDTO[]
 
   @Column({
     select:false
