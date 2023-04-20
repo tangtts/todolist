@@ -2,7 +2,6 @@ import { Avatar, Input, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { fetchInfo, fetchSearchTaskItem } from '../../request/user';
 import { InfoResponse } from '../../types';
-const { Search } = Input;
 
 const Header: React.FC<{ info: InfoResponse['data'] | undefined }> = ({ info }) => {
 

@@ -31,10 +31,11 @@ const TaskItem: React.FC<{
 
   return <div
     className="flex items-center 
-        hover:bg-yellow-100
-        p-4 rounded-sm bg-gray-100 mt-2
-        hover:cursor-pointer
-        "
+  hover:bg-white
+  p-4 rounded-md bg-[#eeeff3] 
+  mt-2
+  hover:cursor-pointer
+  "
     onClick={() => changeTaskItemStatus(item)}
   >
     {/* 左边的圆球 */}
@@ -157,8 +158,8 @@ const Content = () => {
 
 
   return (
-    <div className="bg-blue-100 p-8 flex flex-col h-full">
-      <header className="text-white text-4xl font-bold">xxxx</header>
+    <div className="bg-[#5f73c1] p-8 flex flex-col h-full rounded-md">
+      <header className="text-white text-2xl">xxxx</header>
       <main>
         {/* todoData */}
         {
@@ -173,11 +174,18 @@ const Content = () => {
         }
         {/* 中间的箭头 */}
         <div className="mt-4">
-          <div className="flex items-center  hover:cursor-pointer" onClick={() => setFold(!isFold)}>
+          <div className="inline-flex px-4 py-1 rounded-md justify-between items-center  hover:cursor-pointer
+          bg-[#d0d6ee]
+          border-1
+          border-gray-200
+          hover:bg-white
+          " onClick={() => setFold(!isFold)}>
+
             {
-              isFold ? <ArrowRightOutlined className="text-2xl" /> : <ArrowDownOutlined className="text-2xl" />
+              isFold ? <ArrowRightOutlined className="text-xl" /> : <ArrowDownOutlined className="text-xl" />
             }
-            <header className="text-white text-2xl font-bold">已完成({doneData.length})</header>
+            <header className="
+           ml-4">已完成({doneData.length})</header>
           </div>
 
           {

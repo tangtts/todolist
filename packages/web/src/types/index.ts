@@ -26,5 +26,6 @@ export interface ISideItem {
   txt?: string,
   num?: number | string
   id?:number | string
-  updateItemTxt?:(id:ISideItem['id'],todo:ISideItem['txt'])=>void
+  updateItemTxt?:(id:ISideItem['id'],todo:ISideItem['txt'])=>void,
+  onClick:(id:ISideItem['id'])=>void,
 }

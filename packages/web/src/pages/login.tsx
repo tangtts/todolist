@@ -1,106 +1,95 @@
 import React from "react";
-import { Button, Checkbox, Col, Form, Input, Row } from "antd";
+import { Button, Typography, Col, Form, Input, Row } from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"
 // import a from ""
 import { LoginParmas } from "../types";
 import { fetchLogin } from "../request/user";
-
+import { AlertTwoTone, LockOutlined, UserOutlined } from "@ant-design/icons";
+const { Text, Link } = Typography;
 
 const Login: React.FC = () => {
 
   const navigate = useNavigate();
-  
+
   const onFinish = (values: LoginParmas) => {
-    fetchLogin(values).then(res=>{
-      if(res.code == 200){
-        localStorage.setItem('token',res.data.token);
+    fetchLogin(values).then(res => {
+      if (res.code == 200) {
+        localStorage.setItem('token', res.data.token);
         navigate("/");
       }
     })
-    
-    
   };
+  const goToRegister = () => {
+    navigate("/register");
+  }
   return (
     <div
       className="h-screen 
-        w-full
-        flex-center 
-      bg-yellow-100
-      ">
+    w-full
+    flex-col
+    flex
+    justify-center
+    items-center
+    ">
+      <AlertTwoTone className="text-4xl" />
+
       <div
-        className="p-20 
+        className="
+              p-20
               border-blue-400
-              bg-blue-200
-              shadow-gray-400  
-               shadow-md
+              shadow-orange-100
+              hover:shadow-2xl 
+                duration-200
+                shadow-md
                rounded-md 
                border-2 
                w-1/2 
-               flex-center">
+               bg-blue-100
+               ">
+        <p className="text-2xl text-center cursor-pointer">登录 </p>
         <Form
           name="basic"
           onFinish={onFinish}
           autoComplete="off"
           size="large"
-          initialValues={{
-            phoneNumber:"18623816694",
-            password:"123456"
-          }}
+          labelAlign="left"
+          layout={"vertical"}
           className="w-full">
-          <Form.Item
-            label="手机号"
-            name="phoneNumber"
-            rules={[
-              { required: true, message: "Please input your username!" },
-            ]}>
-            <Input />
-          </Form.Item>
 
           <Form.Item
-            label="Password"
+            label="账号"
+            name="phoneNumber"
+            rules={
+              [{ required: true, message: "请输入账号" }]
+            }
+          >
+            <Input prefix={<UserOutlined />} placeholder="请输入手机号" />
+          </Form.Item>
+
+
+          <Form.Item
+            label="密码"
             name="password"
             rules={[
-              { required: true, message: "Please input your password!" },
+              { type: "string", min: 3, max: 8 },
+              { required: true, message: "请输入密码" },
             ]}>
-            <Input.Password />
-          </Form.Item>
-
-          <Form.Item
-            label="Captcha"
-            extra="We must make sure that your are a human."
-            rules={[{ required: true, message: 'Please input the captcha you got!' }]}
-          >
-            <Row gutter={8}>
-              <Col span={16}>
-                <Input />
-              </Col>
-
-              <Col span={8}>
-
-                <Button>Get captcha</Button>
-
-              </Col>
-            </Row>
-          </Form.Item>
-
-
-
-          <Form.Item name="remember" valuePropName="checked"
-          >
-            <Checkbox defaultChecked={true}>Remember me</Checkbox>
+            <Input.Password placeholder="请输入密码" prefix={<LockOutlined />} />
           </Form.Item>
 
           <Form.Item>
+            <Link className="float-right" onClick={goToRegister}>没有账号？去注册</Link>
             <Button
               type="primary"
               size="large"
               htmlType="submit"
-              className="bg-blue-500">
+              className="bg-blue-500 w-1/2 mx-auto flex justify-center">
               Submit
             </Button>
           </Form.Item>
         </Form>
+
       </div>
     </div>
   );

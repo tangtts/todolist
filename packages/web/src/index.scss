@@ -4,8 +4,53 @@
 
 @layer utilities {
   .flex-center {
-   display:flex;
-   justify-content: center;
-   align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
+}
+
+.fade-enter {
+  opacity: 0;
+  transform: translateX(-50%);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: translateX(0%);
+}
+.fade-exit {
+  opacity: 1;
+  transform: translateX(0%);
+}
+.fade-exit-active {
+  opacity: 0;
+
+  transform: translateX(50%);
+}
+.fade-enter-active,
+.fade-exit-active {
+  transition: opacity 500ms, transform 500ms;
+}
+
+
+
+.translateY-enter {
+  opacity: 0;
+  transform: translateY(100px);
+}
+
+.translateY-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity transform 500ms ease-in;
+}
+
+.translateY-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+.translateY-exit-active {
+  opacity: 0;
+  transform: translateY(100px);
+  transition: opacity transform 500ms ease-in;
 }

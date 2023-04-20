@@ -3,14 +3,18 @@ import { Button, Space } from 'antd';
 import Home from './pages/home';
 import React from 'react';
 import Login from './pages/login';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { CSSTransition,TransitionGroup,SwitchTransition} from "react-transition-group"
+import { BrowserRouter as Router, Outlet, Route, useLocation } from 'react-router-dom';
 function App() {
-  const [count, setCount] = useState(0);
-
+  const location = useLocation()
   return (
     <div className='h-screen'>
-      <Home></Home>
-    </div>
+    <SwitchTransition mode="out-in">
+       <CSSTransition key={location.key} timeout={300} classNames="fade" nodeRef={null}>
+           <Outlet />
+       </CSSTransition>
+   </SwitchTransition>
+  </div>
   )
 }
 
