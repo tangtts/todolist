@@ -19,7 +19,6 @@ import { JwtService } from "@nestjs/jwt";
 import { UploadService } from "src/shared/upload/upload.service";
 import { deleteProperty } from "src/shared/utils/deleteNoUserdProperty";
 import { TaskItemDTO } from "../dtos/task-item.dto";
-import { HttpErrorByCode } from "@nestjs/common/utils/http-error-by-code.util";
 @Injectable()
 export default class UserService {
   constructor(
@@ -48,7 +47,7 @@ export default class UserService {
     u.salt = salt;
     u.password = hashPassword;
     u.phoneNumber = user.phoneNumber;
-    u.avatar = "";
+    u.avatar = user.avatar;
     u.taskList = [];
     u.nickName = user.nickName;
     return this.userRepository.save(u);
@@ -185,7 +184,7 @@ export default class UserService {
    */
   async uploadAvatar(file) {
     const { url } = await this.uploadService.upload(file);
-    return { data: "http://localhost:3000" + url };
+    return { path: "http://localhost:3000" + url };
   }
 
   /**

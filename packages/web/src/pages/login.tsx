@@ -26,11 +26,11 @@ const Login: React.FC = () => {
   return (
     <div
       className="h-screen 
-    w-full
-    flex-col
-    flex
-    justify-center
-    items-center
+                w-full
+                flex-col
+                flex
+                justify-center
+                items-center
     ">
       <AlertTwoTone className="text-4xl" />
 
@@ -40,8 +40,8 @@ const Login: React.FC = () => {
               border-blue-400
               shadow-orange-100
               hover:shadow-2xl 
-                duration-200
-                shadow-md
+              duration-200
+              shadow-md
                rounded-md 
                border-2 
                w-1/2 
@@ -55,6 +55,10 @@ const Login: React.FC = () => {
           size="large"
           labelAlign="left"
           layout={"vertical"}
+          initialValues={{
+            phoneNumber:"18623816694",
+            password:"123456"
+          }}
           className="w-full">
 
           <Form.Item
@@ -64,7 +68,7 @@ const Login: React.FC = () => {
               [{ required: true, message: "请输入账号" }]
             }
           >
-            <Input prefix={<UserOutlined />} placeholder="请输入手机号" />
+            <Input prefix={<UserOutlined />} className="h-12" placeholder="请输入手机号" />
           </Form.Item>
 
 
@@ -75,7 +79,7 @@ const Login: React.FC = () => {
               { type: "string", min: 3, max: 8 },
               { required: true, message: "请输入密码" },
             ]}>
-            <Input.Password placeholder="请输入密码" prefix={<LockOutlined />} />
+            <Input.Password placeholder="请输入密码" className="h-12" prefix={<LockOutlined />} />
           </Form.Item>
 
           <Form.Item>

@@ -10,6 +10,17 @@ export function fetchLogin(data:LoginParmas){
   })
 }
 
+export function fetchRegister(data){
+  return requset<any>({
+    method:"POST",
+    url:UserUrl.RegisterUrl,
+    data,
+  })
+}
+
+
+
+
 export function fetchInfo(){
   return requset<InfoResponse>({
     url:UserUrl.InfoUrl,
@@ -40,3 +51,10 @@ export function fetchSearchTaskItem(data){
   })
 }
 
+export function fetchUpdateUser(data){
+  return requset<InfoResponse>({
+    url:UserUrl.updateUrl,
+    method:"Post",
+    data
+  })
+}

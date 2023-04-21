@@ -20,11 +20,13 @@ export class UpdateUserDTO {
   @ApiProperty({ example: "123456", description: "旧密码" })
   @IsString()
   @Length(3, 6)
+  @IsOptional()
   oldPassword?: string;
 
   @ApiProperty({ example: "123457", description: "新密码" })
   @IsString()
   @Length(3, 6)
+  @IsOptional()
   newPassword?: string;
 
   // 不展示

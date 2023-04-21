@@ -3,6 +3,18 @@ export interface LoginParmas {
   password:string
 }
 
+export interface RegisterParams{
+  nickName: string,
+  phoneNumber: string,
+  password: string,
+  password_confirmed: string,
+  avatar: string
+}
+
+export type UpdateParams  =  Omit<RegisterParams,'password' | 'password_confirmed'>
+
+
+
 interface CommonResponse<T = unknown>  {
   code:number
   data:T
@@ -11,6 +23,7 @@ interface CommonResponse<T = unknown>  {
 export type LoginResponse = CommonResponse<{token:string}>
 
 export type InfoResponse = CommonResponse<{
+  _id:string
   nickName:string,
   avatar:string,
   phoneNumber:string,
@@ -19,6 +32,17 @@ export type InfoResponse = CommonResponse<{
 
 export type TaskListResponse = CommonResponse<Array< Omit<ISideItem,'updateItemTxt' | 'id'>>
 >
+
+export type UploadResponse = CommonResponse<{
+  path:string
+}>
+
+
+
+
+
+
+
 
 
 export interface ISideItem {

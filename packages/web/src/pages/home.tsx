@@ -20,14 +20,17 @@ function Home() {
 
   const [info, setInfo] = useState<InfoResponse['data']>()
 
-  useEffect(() => {
+
+  function getInfo() {
     fetchInfo().then(res => {
       if (res) {
         setInfo(res.data)
         setSideTodoList(res.data.taskList)
-        console.log(res.data)
       }
     })
+  }
+  useEffect(() => {
+    getInfo()
   }, [])
 
   const [sideTodoList, setSideTodoList] = useState<ISideItem[]>([]);
@@ -65,7 +68,9 @@ function Home() {
     <div
       className="w-30 bg-[#f4f4f4] py-5 px-4 relative"
     >
-      <Header info={info}></Header>
+      {info?._id && <Header
+        changeInfo={getInfo}
+        info={info}></Header>}
       <Search placeholder="input search text"
         size="large"
         allowClear
