@@ -8,8 +8,6 @@ import {
   Inject,
   NotFoundException,
   UnauthorizedException,
-  UseGuards,
-  HttpStatus,
 } from "@nestjs/common";
 import { MongoRepository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -96,22 +94,24 @@ export default class UserService {
     if (!findUser) {
       return new NotFoundException("用户不存在！");
     }
-
     // 说明要改密码
     if (user.oldPassword) {
       // 判断老密码是否正确
       const oldEncrytPassword = encrytPassword(user.oldPassword, findUser.salt);
+      
       if (findUser.password !== oldEncrytPassword) {
-        return new UnauthorizedException("认证失败");
+        throw new UnauthorizedException("认证失败");
       }
-
-      deleteProperty(["oldPassword", "newPassword"], user);
       const { salt, hashPassword } = this.getPassword(user.newPassword);
-      user.salt = salt;
+      findUser.salt = salt;
       findUser.password = hashPassword;
     }
-    user = Object.assign(findUser, user);
-    const result = await this.userRepository.update(id, user);
+    Object.entries(user).forEach(([k, v]) => {
+      if (v) {
+        findUser[k] = v;
+      }
+    });
+    const result = await this.userRepository.update(id, findUser);
     return result.affected;
   }
 

@@ -40,11 +40,6 @@ export type UploadResponse = CommonResponse<{
 
 
 
-
-
-
-
-
 export interface ISideItem {
   icon?: React.ReactNode,
   txt?: string,
@@ -52,4 +47,13 @@ export interface ISideItem {
   id?:number | string
   updateItemTxt?:(id:ISideItem['id'],todo:ISideItem['txt'])=>void,
   onClick:(id:ISideItem['id'])=>void,
+}
+
+
+export interface ITaskItem {
+  _id:number
+  taskId:number,
+  taskName: string,
+  isComplated: boolean,
+  isMarked: boolean,
 }

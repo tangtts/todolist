@@ -1,22 +1,39 @@
-import React, { Key, useState } from "react"
+import React, { Key, useEffect, useRef, useState } from "react"
 import { BulbTwoTone, UnorderedListOutlined } from "@ant-design/icons"
 import { Input } from "antd"
 import { ISideItem } from "../../types"
+import type { InputRef } from 'antd';
 
-
-
-const SideItem: React.FC<ISideItem> = ({ icon = <BulbTwoTone />, txt = '', num = 0, id, onClick: handleClick, updateItemTxt }) => {
+const SideItem: React.FC<ISideItem & {chosenId:string}> = ({ icon = <BulbTwoTone />, txt = '', num = 0, id, onClick: handleClick, updateItemTxt,chosenId }) => {
 
   const [status, setStatus] = useState(true)
+  const inputRef = useRef<InputRef>(null)
 
-  const blur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
-
-    if (id) {
-      updateItemTxt?.(id, e.target.value)
-    }
+  const changeInputStatus = (id, value: string) => {
+    updateItemTxt?.(id, value)
     setStatus(true)
   }
+
+  const blur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
+    if (id) {
+      changeInputStatus(id, e.target.value)
+    }
+  }
+
+  const enter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    changeInputStatus(id, ((e.target) as HTMLInputElement).value)
+  }
+
+  useEffect(() => {
+    if (!status) {
+      inputRef.current?.focus({
+        cursor: 'end'
+      })
+    }
+  }, [status])
+
   const onClick = () => {
+    setStatus(false)
     id && handleClick(id)
   }
 
@@ -28,9 +45,11 @@ const SideItem: React.FC<ISideItem> = ({ icon = <BulbTwoTone />, txt = '', num =
     duration-150
     hover:bg-gray-300
     hover:cursor-pointer
+    bg-gray-100
     mt-2
     h-12
     "
+    style={{backgroundColor: chosenId==id ?  'rgb(243 244 246)' : "rgb(191,219,254)"}}
       onClick={onClick}
     >
 
@@ -39,9 +58,9 @@ const SideItem: React.FC<ISideItem> = ({ icon = <BulbTwoTone />, txt = '', num =
       <div className="flex items-center">
         {icon}
         {
-          status ? <p className="ml-4" onClick={() => { setStatus(false) }}>{txt}</p>
+          status ? <p className="ml-4">{txt}</p>
 
-            : <Input defaultValue={txt} onBlur={(e) => blur(e)}></Input>
+            : <Input defaultValue={txt} onPressEnter={(e) => enter(e)} onBlur={(e) => blur(e)} ref={inputRef}></Input>
         }
 
       </div>

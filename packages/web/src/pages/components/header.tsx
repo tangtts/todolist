@@ -3,12 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { fetchInfo, fetchSearchTaskItem, fetchUpdateUser } from '../../request/user';
 import { InfoResponse, UpdateParams, UploadResponse } from '../../types';
 import { CustomerUpload } from './upload';
-import { PhoneOutlined, UserOutlined } from '@ant-design/icons';
-const Header: React.FC<{ info: InfoResponse['data'],changeInfo:()=>void }> = ({ info,changeInfo }) => {
+import { LockOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
+const Header: React.FC<{ info: InfoResponse['data'], changeInfo: () => void }> = ({ info, changeInfo }) => {
   const [form] = Form.useForm();
 
   const [open, setOpen] = useState(false);
-
+  const [registerAvatarParams, setRegisterAvatarParams] = useState<UpdateParams['avatar']>('')
   const showDrawer = () => {
     setOpen(true);
   };
@@ -17,22 +17,25 @@ const Header: React.FC<{ info: InfoResponse['data'],changeInfo:()=>void }> = ({ 
   };
 
 
-  const onFinish = ()=>{
-    const values = form.getFieldsValue();
-    console.log(values); // 输出表单数据
-    fetchUpdateUser(values).then(res=>{
-      if(res.code == 200){
+  const onFinish = () => {
+    const values = form.getFieldsValue() as Omit<UpdateParams, "avatar">;
+
+    fetchUpdateUser({
+      ...values,
+      ...{ avatar: registerAvatarParams },
+    }).then(res => {
+      if (res.code == 200) {
         onClose()
         changeInfo()
       }
     })
   }
 
- 
+
 
   const uploadChange = (response: UploadResponse) => {
     if (response.code == 200) {
-      // registerParams &&  setRegisterParams({...registerParams,avatar:response.data.path})
+      setRegisterAvatarParams(response.data.path)
     }
   }
 
@@ -63,7 +66,7 @@ const Header: React.FC<{ info: InfoResponse['data'],changeInfo:()=>void }> = ({ 
           }
         >
           <Form
-          form={form}
+            form={form}
             name="basic"
             size="large"
             labelAlign="left"
@@ -93,10 +96,29 @@ const Header: React.FC<{ info: InfoResponse['data'],changeInfo:()=>void }> = ({ 
               label="手机号"
               name="phoneNumber"
               rules={[
-                { type: "string", min: 3, max: 8, message: "手机号必须在3位到8位之间" },
+                { type: "string", len: 11, message: "手机号必须在3位到8位之间" },
               ]}>
               <Input prefix={<PhoneOutlined />} className="h-12" placeholder="请输入手机号" />
             </Form.Item>
+
+            <Form.Item
+              label="旧密码"
+              name="oldPassword"
+              rules={[
+                { type: "string", min: 3, max: 6, message: "密码长度在3位到6位之间" },
+              ]}>
+              <Input prefix={<LockOutlined />} className="h-12" placeholder="请输入旧密码" />
+            </Form.Item>
+
+            <Form.Item
+              label="新密码"
+              name="newPassword"
+              rules={[
+                { type: "string", min: 3, max: 6, message: "密码长度在3位到6位之间" },
+              ]}>
+              <Input prefix={<LockOutlined />} className="h-12" placeholder="请输入新密码" />
+            </Form.Item>
+
           </Form>
         </Drawer>
       </div>

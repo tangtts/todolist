@@ -1,4 +1,4 @@
-import { LoginParmas, LoginResponse,InfoResponse, TaskListResponse } from './../types/index';
+import { LoginParmas, LoginResponse,InfoResponse, TaskListResponse, UpdateParams } from './../types/index';
 import  {UserUrl} from "./urls"
 import {requset} from ".";
 
@@ -51,7 +51,7 @@ export function fetchSearchTaskItem(data){
   })
 }
 
-export function fetchUpdateUser(data){
+export function fetchUpdateUser(data:UpdateParams){
   return requset<InfoResponse>({
     url:UserUrl.updateUrl,
     method:"Post",

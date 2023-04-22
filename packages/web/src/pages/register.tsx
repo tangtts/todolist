@@ -31,7 +31,7 @@ const Reigister: React.FC = () => {
     registerParams.password = values.password
     registerParams.password_confirmed = values.password_confirmed
     fetchRegister(registerParams).then(res => {
-      navigate("/")
+      navigate("/login")
     })
   };
 
@@ -106,6 +106,7 @@ const Reigister: React.FC = () => {
             name="phoneNumber"
             rules={[
               { required: true, message: "请输入手机号" },
+              { len: 11, message: "请输入11位手机号" },
             ]}>
             <Input prefix={<PhoneOutlined />} className="h-12" placeholder="请输入手机号" />
           </Form.Item>
@@ -114,7 +115,7 @@ const Reigister: React.FC = () => {
             label="密码"
             name="password"
             rules={[
-              { type: "string", min: 3, max: 8, message: "密码长度必须在3位到8位之间" },
+              { type: "string", min: 3, max: 6, message: "密码长度必须在3位到6位之间" },
               { required: true, message: "请输入密码" },
 
             ]}>
@@ -125,7 +126,7 @@ const Reigister: React.FC = () => {
             label="确认密码"
             name="password_confirmed"
             rules={[
-              { type: "string", min: 3, max: 8, message: "密码长度必须在3位到8位之间" },
+              { type: "string", min: 3, max: 6, message: "密码长度必须在3位到6位之间" },
               { required: true, message: "请输入密码" },
               ({ getFieldValue }) => ({
                 validator(_, value) {

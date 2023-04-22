@@ -10,4 +10,11 @@ export namespace UserUrl {
   export const uploadUrl =  AxiosInstance.defaults.baseURL + '/user/upload'
   export const updateUrl =  'user/update'
   
+  
 } 
+export namespace TaskUrl{
+  export const addTaskUrl =  'task/add'
+  export const filterTaskUrl =  'task/filter'
+  export const changeTaskMarkedUrl =  'task/mark'
+  export const changeTaskComplatedUrl =  'task/complate'
+}

@@ -1,30 +1,24 @@
 import { ArrowDownOutlined, ArrowRightOutlined, CheckCircleOutlined, ClockCircleOutlined, StarFilled, StarOutlined } from "@ant-design/icons"
 import { Input } from "antd"
-import React, { useState } from "react"
-
-interface IData {
-  id: number
-  txt: string,
-  isComplated: boolean,
-  isMarked: boolean,
-}
-
+import React, { useEffect, useState } from "react"
+import { fetchAddTask, fetchChangeTaskMarked, fetchFilterTask,fetchChangeTaskComplated } from "../../request/task"
+import { ITaskItem } from "../../types"
 
 type ActionType = 'todo' | 'done'
-type ChangeMark = (type: ActionType, item: IData) => void;
-type ChangeStatus = (type: ActionType, item: IData) => void;
+type ChangeMark = (type: ActionType, item: ITaskItem) => void;
+type ChangeStatus = (type: ActionType, item: ITaskItem) => void;
 
 const TaskItem: React.FC<{
-  item: IData,
+  item: ITaskItem,
   changeMark: ChangeMark,
   changeStatus: ChangeStatus,
   type: ActionType
 }> = ({ item, changeStatus, changeMark, type }) => {
 
-  const changeTaskItemStatus = (item: IData) => {
+  const changeTaskItemStatus = (item: ITaskItem) => {
     changeStatus(type, item)
   }
-  const changeTaskItemMark = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, item: IData) => {
+  const changeTaskItemMark = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, item: ITaskItem) => {
     e.stopPropagation()
     changeMark(type, item)
   }
@@ -44,7 +38,7 @@ const TaskItem: React.FC<{
         item.isComplated ? <CheckCircleOutlined /> : <ClockCircleOutlined />
       }
     </div>
-    <p className="ml-4">{item.txt}</p>
+    <p className="ml-4">{item.taskName}</p>
 
     <div className="ml-auto" onClick={(e) => changeTaskItemMark(e, item)}>
       {
@@ -55,42 +49,29 @@ const TaskItem: React.FC<{
   </div>
 }
 
-const Content = () => {
+const Content: React.FC<{ taskId: string }> = ({ taskId }) => {
 
-  const [toDoData, setToDoData] = useState<IData[]>([
-    {
-      id: 0,
-      txt: "aaaa",
-      isComplated: false,
-      isMarked: false
-    }, {
-      id: 1,
-      txt: "bbbb",
-      isComplated: false,
-      isMarked: true
-    }
-  ])
+  const [toDoData, setToDoData] = useState<ITaskItem[]>([])
+
+  useEffect(() => {
+    fetchFilterTask({ taskId }).then(res => {
+      console.log(res)
+      if (res.code == 200) {
+        setToDoData(res.data.data.unComplatedList)
+        setDoneData(res.data.data.isComplatedList)
+      }
+    })
+  }, [taskId])
 
 
-  const [doneData, setDoneData] = useState<IData[]>([
-    {
-      id: 2,
-      txt: "aaaa",
-      isComplated: true,
-      isMarked: false
-    }, {
-      id: 3,
-      txt: "bbbb",
-      isComplated: true,
-      isMarked: true
-    }
-  ])
+
+  const [doneData, setDoneData] = useState<ITaskItem[]>([])
   const [isFold, setFold] = useState(false)
 
 
   function setDataAndAction(type: ActionType) {
-    let temData: IData[] = [];
-    let action: React.Dispatch<React.SetStateAction<IData[]>>;
+    let temData: ITaskItem[] = [];
+    let action: React.Dispatch<React.SetStateAction<ITaskItem[]>>;
     if (type == "todo") {
       temData = toDoData;
       action = setToDoData
@@ -106,54 +87,69 @@ const Content = () => {
   }
 
 
-  function setMark(type: ActionType, K: 'isMarked' | 'isComplated', chosenItem: IData) {
-    const { temData, action } = setDataAndAction(type)
-    const tempData = temData.map(item => {
-      if (item.id === chosenItem.id) {
-        item[K] = !item[K]
-      }
-      return item
-    })
-    action(tempData)
+ 
+
+/**
+ *
+ * @description 根据 id 区分任务
+ * @param {number} id
+ * @param {ITaskItem[]} data
+ * @return {*} 
+ */
+// function filterDataById(id: number, data: ITaskItem[]) {
+//     let chosenData: ITaskItem[] = []
+//     let filterData: ITaskItem[] = []
+//     data.forEach(item => {
+//       if (item._id == id) {
+//         chosenData.push(item)
+//       } else {
+//         filterData.push(item)
+//       }
+//     })
+//     return {
+//       chosenData,
+//       filterData
+//     }
+//   }
+
+  function setStatus(type: ActionType, K: 'isMarked' | 'isComplated', chosenItem: ITaskItem) {
+    // if (type == 'todo') {
+    //   const { chosenData, filterData } = filterDataById(chosenItem._id, toDoData)
+    //   setToDoData(filterData)
+    //   setDoneData([...doneData, ...chosenData])
+    // } else {
+    //   const { chosenData, filterData } = filterDataById(chosenItem._id, doneData)
+    //   setDoneData(filterData)
+    //   setToDoData([...toDoData, ...chosenData])
+    // }
   }
 
 
-  function filterDataById(id: number, data: IData[]) {
-    let chosenData: IData[] = []
-    let filterData: IData[] = []
-    data.forEach(item => {
-      if (item.id == id) {
-        chosenData.push(item)
-      } else {
-        filterData.push(item)
-      }
-    })
-    return {
-      chosenData,
-      filterData
-    }
-  }
-
-  function setStatus(type: ActionType, K: 'isMarked' | 'isComplated', chosenItem: IData) {
-    if (type == 'todo') {
-      const { chosenData, filterData } = filterDataById(chosenItem.id, toDoData)
-      setToDoData(filterData)
-      setDoneData([...doneData, ...chosenData])
-    } else {
-      const { chosenData, filterData } = filterDataById(chosenItem.id, doneData)
-      setDoneData(filterData)
-      setToDoData([...toDoData, ...chosenData])
-    }
-  }
-
-
-  const changeStatus = (type: ActionType, chosenItem: IData) => {
+  const changeStatus = (type: ActionType, chosenItem: ITaskItem) => {
     setStatus(type, "isComplated", chosenItem)
   }
 
-  const changeMark = (type: ActionType, chosenItem: IData) => {
-    setMark(type, "isMarked", chosenItem)
+  const changeMark = (chosenItem: ITaskItem) => {
+    fetchChangeTaskComplated({id:chosenItem._id,isComplated:!chosenItem.isComplated}).then(res=>{
+      console.log(res)
+    })
   }
+  const [taskName, setTaskName] = useState('')
+
+  const addTask = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    let taskName = ((e.target) as HTMLInputElement).value;
+    if (taskId) {
+      fetchAddTask({
+        taskName,
+        taskId
+      }).then(res => {
+        if (res.code == 200) {
+          setTaskName('')
+        }
+      })
+    }
+  }
+
 
 
 
@@ -166,8 +162,8 @@ const Content = () => {
           toDoData.map(item => {
             return <TaskItem
               type="todo"
-              key={item.id}
-              changeMark={changeMark}
+              key={item._id}
+              changeMark={()=>changeMark(item)}
               changeStatus={changeStatus}
               item={item} />
           })
@@ -192,8 +188,8 @@ const Content = () => {
             doneData.map(item => {
               return <TaskItem
                 type="done"
-                key={item.id}
-                changeMark={changeMark}
+                key={item._id}
+                changeMark={()=>changeMark(item)}
                 changeStatus={changeStatus}
                 item={item} />
             })
@@ -203,7 +199,7 @@ const Content = () => {
 
       </main>
       <footer className="mt-auto">
-        <Input></Input>
+        <Input size="large" value={taskName} onChange={e => setTaskName(e.target.value)} onPressEnter={(e) => addTask(e)}></Input>
 
       </footer>
     </div>

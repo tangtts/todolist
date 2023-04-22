@@ -47,7 +47,6 @@ export default class UserController {
   })
   @Post("register")
   register(@Body() user: CreateUserDTO) {
-    console.log(user,"useraa")
     return this.userService.register(user);
   }
 

@@ -46,7 +46,7 @@ export const CustomerUpload: React.FC<{
   const uploadButton = (
     <div>
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
+      <div className='mt-2'>Upload</div>
     </div>
   );
 
@@ -60,7 +60,7 @@ export const CustomerUpload: React.FC<{
       beforeUpload={beforeUpload}
       onChange={handleChange}
     >
-      {imageUrl ? <img src={imageUrl} alt="avatar" style={{ width: '100%' }} /> : uploadButton}
+      {imageUrl ? <img src={imageUrl} alt="avatar" className='w-full aspect-square' /> : uploadButton}
     </Upload>
   )
 }

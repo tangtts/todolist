@@ -56,16 +56,19 @@ const Login: React.FC = () => {
           labelAlign="left"
           layout={"vertical"}
           initialValues={{
-            phoneNumber:"18623816694",
-            password:"123456"
+            phoneNumber: "18623816694",
+            password: "123456"
           }}
           className="w-full">
 
           <Form.Item
-            label="账号"
+            label="手机号"
             name="phoneNumber"
             rules={
-              [{ required: true, message: "请输入账号" }]
+              [
+                { required: true, message: "请输入手机号" },
+                { len: 11, message: "请输入11位手机号" },
+              ]
             }
           >
             <Input prefix={<UserOutlined />} className="h-12" placeholder="请输入手机号" />
@@ -76,7 +79,7 @@ const Login: React.FC = () => {
             label="密码"
             name="password"
             rules={[
-              { type: "string", min: 3, max: 8 },
+              { type: "string", min: 3, max: 6,message:"密码长度必须在3位到6位之间" },
               { required: true, message: "请输入密码" },
             ]}>
             <Input.Password placeholder="请输入密码" className="h-12" prefix={<LockOutlined />} />

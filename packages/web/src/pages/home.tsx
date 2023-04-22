@@ -15,6 +15,7 @@ import {
   CSSTransition,
   TransitionGroup,
 } from 'react-transition-group';
+import { fetchFilterTask } from "../request/task"
 function Home() {
 
 
@@ -39,12 +40,15 @@ function Home() {
     let o = {
       id: Date.now(),
       txt: `任务列表${index.current++}`,
-      num: 0
+      num: 0,
     };
     fetchAddTaskItem(o).then(res => {
       setSideTodoList([...res.data])
     })
   }
+
+ 
+ 
 
   const updateItemTxt = (id: string | number | undefined, txt: string | undefined) => {
     let temp = sideTodoList.find(item => item.id == id)
@@ -60,8 +64,11 @@ function Home() {
     })
   };
 
-  const chooseItem = (side: any) => {
-    console.log(side)
+  /** 侧边选中item */
+  const [chosenId,setChosenId] = useState('')
+  const chooseItem = (chosenId: any) => {
+    setChosenId(chosenId)
+   
   }
 
   return <div className="h-full flex">
@@ -81,11 +88,13 @@ function Home() {
         <SideItem txt={'重要'} icon={<StarTwoTone />}
           id={1}
           onClick={chooseItem}
+          chosenId={'0'}
           num={10} />
 
         <SideItem txt={'重要'}
           onClick={chooseItem}
           id={2}
+          chosenId={'1'}
           icon={<CalendarTwoTone />} num={10} />
       </div>
       <Divider className="my-4 border-t-1 border-gray-600"></Divider>
@@ -101,6 +110,7 @@ function Home() {
             >
               <SideItem
                 {...side}
+                chosenId={chosenId}
                 updateItemTxt={updateItemTxt}
                 onClick={chooseItem}
                 key={side.id}
@@ -130,7 +140,7 @@ function Home() {
       </div>
     </div>
     <div className="flex-1">
-      <Content></Content>
+      <Content taskId={chosenId}></Content>
     </div>
   </div>
 }
