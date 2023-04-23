@@ -27,10 +27,11 @@ export type InfoResponse = CommonResponse<{
   nickName:string,
   avatar:string,
   phoneNumber:string,
-  taskList:Omit<ISideItem,'updateItemTxt' | 'id'>[]
+  id:number,
+  taskList:Omit<ISideItem,'updateItemTxt'>[]
 }>
 
-export type TaskListResponse = CommonResponse<Array< Omit<ISideItem,'updateItemTxt' | 'id'>>
+export type TaskListResponse = CommonResponse<Array<Omit<ISideItem,'updateItemTxt'>>
 >
 
 export type UploadResponse = CommonResponse<{
@@ -43,11 +44,19 @@ export type UploadResponse = CommonResponse<{
 export interface ISideItem {
   icon?: React.ReactNode,
   txt?: string,
-  num?: number | string
-  id?:number | string
+  num?: number
+  id:number
   updateItemTxt?:(id:ISideItem['id'],todo:ISideItem['txt'])=>void,
   onClick:(id:ISideItem['id'])=>void,
 }
+
+// 过滤任务
+export type FilterTaskResponse  = CommonResponse<{
+  complatedList:ITaskItem[],
+  unComplatedList:ITaskItem[]
+}> 
+
+
 
 
 export interface ITaskItem {

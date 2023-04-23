@@ -1,7 +1,7 @@
 import { TaskEntity } from "./../entities/task.entity";
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { MongoRepository } from "typeorm";
+import { getMongoRepository, MongoRepository } from "typeorm";
 import { TodoDTO } from "../dtos/todo.dto";
 import { UserEntity } from "../entities/user.entity";
 import { ObjectId } from "mongodb";
@@ -23,44 +23,101 @@ export class TaskService {
     t.taskId = task.taskId;
     t.userId = id;
     let r = await this.taskRepository.save(t);
-    return {
-      ok: HttpStatus.OK,
-    };
+    return;
   }
 
   async filterTask(task: { taskId: string }) {
-    const taskList = await this.taskRepository.findBy({ taskId: task.taskId });
-    const isComplatedList: TodoDTO[] = [];
+    const taskList = await this.taskRepository.findBy({
+      taskId: Number(task.taskId),
+    });
+    const complatedList: TodoDTO[] = [];
     const unComplatedList: TodoDTO[] = [];
     taskList.forEach(task => {
       if (task.isComplated) {
-        isComplatedList.push(task);
+        complatedList.push(task);
       } else {
         unComplatedList.push(task);
       }
     });
     return {
-      ok: HttpStatus.OK,
-      data: {
-        isComplatedList,
-        unComplatedList,
-      },
+      complatedList,
+      unComplatedList,
     };
   }
-  async complate({ id, isComplated }: { id: string; isComplated: boolean }) {
-    const task = await this.taskRepository.findOneBy({ _id: ObjectId(id) });
+
+  /**
+   *
+   * @description 切换是否完成
+   * @param {{ id: string; isComplated: boolean }} { id, isComplated }
+   * @return {*}
+   * @memberof TaskService
+   */
+  async toggleComplate({
+    id,
+    isComplated,
+  }: {
+    id: string;
+    isComplated: boolean;
+  }) {
     let r = await this.taskRepository.update(
       { _id: ObjectId(id) },
       { isComplated }
     );
+    return r.affected;
+  }
 
-    const taskList = await this.taskRepository.findBy({ taskId: task.taskId });
+  /**
+   *
+   * @description 标记
+   * @param {{ id: string; isMarked: boolean }} { id, isMarked }
+   * @return {*}
+   * @memberof TaskService
+   */
+  async mark({ id, isMarked }: { id: string; isMarked: boolean }) {
+    let r = await this.taskRepository.update(
+      { _id: ObjectId(id) },
+      { isMarked }
+    );
+    return r.affected;
+  }
 
-    return {
-      ok: HttpStatus.OK,
-      data: {
-        taskList,
+  /**
+   *
+   * @description 获取已经完成的
+   * @param {string} userId
+   * @return {*}
+   * @memberof TaskService
+   */
+  async getAllComplated(userId: string) {
+    let [tasks, count] = await this.taskRepository.findAndCountBy({
+      where: {
+        userId,
+        isComplated: true,
       },
+    });
+    return {
+      tasks,
+      total: count,
+    };
+  }
+
+  /**
+   *
+   * @description 获取被标记的
+   * @param {string} userId
+   * @return {*}
+   * @memberof TaskService
+   */
+  async getAllMarked(userId: string) {
+    let [tasks, count] = await this.taskRepository.findAndCountBy({
+      where: {
+        userId,
+        isMarked: true,
+      },
+    });
+    return {
+      tasks,
+      total: count,
     };
   }
 }

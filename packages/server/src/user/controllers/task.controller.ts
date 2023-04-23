@@ -48,7 +48,7 @@ export default class TaskController {
   @UseGuards(AuthGuard)
   @Post("add")
   add(@Req() req: any, @Body() task: TodoDTO) {
-    return this.taskService.addTask(req.user.id,task);
+    return this.taskService.addTask(req.user.id, task);
   }
 
   @ApiOperation({
@@ -57,20 +57,51 @@ export default class TaskController {
   @ApiBearerAuth("JWT")
   @UseGuards(AuthGuard)
   @Post("filter")
-  filter(@Req() req: any, @Body() task: {taskId:string}) {
+  filter(@Req() req: any, @Body() task: { taskId: string }) {
     return this.taskService.filterTask(task);
   }
 
-
   @ApiOperation({
-    summary: "更新todo状态",
+    summary: "切换todo是否完成",
   })
   @ApiBearerAuth("JWT")
   @UseGuards(AuthGuard)
-  @Post("complate")
-  mark(@Req() req: any, @Body() task: {id:string,isComplated:boolean}) {
-    return this.taskService.complate(task);
+  @Post("toggleComplate")
+  toggleComplate(
+    @Req() req: any,
+    @Body() task: { id: string; isComplated: boolean }
+  ) {
+    return this.taskService.toggleComplate(task);
   }
 
+  @ApiOperation({
+    summary: "任务添加标记",
+  })
+  @ApiBearerAuth("JWT")
+  @UseGuards(AuthGuard)
+  @Post("mark")
+  mark(@Req() req: any, @Body() task: { id: string; isMarked: boolean }) {
+    return this.taskService.mark(task);
+  }
+
+  @ApiOperation({
+    summary: "获取已经完成的所有任务",
+  })
+  @ApiBearerAuth("JWT")
+  @UseGuards(AuthGuard)
+  @Get("getAllComplated")
+  getAllComplated(@Req() req: any) {
+    return this.taskService.getAllComplated(req.user.id);
+  }
+
+  @ApiOperation({
+    summary: "获取已经标记的任务",
+  })
+  @ApiBearerAuth("JWT")
+  @UseGuards(AuthGuard)
+  @Get("getAllMarked")
+  getAllMarked(@Req() req: any) {
+    return this.taskService.getAllMarked(req.user.id);
+  }
 
 }

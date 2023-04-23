@@ -1,26 +1,27 @@
 import { ArrowDownOutlined, ArrowRightOutlined, CheckCircleOutlined, ClockCircleOutlined, StarFilled, StarOutlined } from "@ant-design/icons"
 import { Input } from "antd"
-import React, { useEffect, useState } from "react"
-import { fetchAddTask, fetchChangeTaskMarked, fetchFilterTask,fetchChangeTaskComplated } from "../../request/task"
+import React, { forwardRef, Ref, useEffect, useImperativeHandle, useState } from "react"
+import { fetchAddTask, fetchChangeTaskMarked, fetchFilterTask, fetchChangeTaskComplated, fetchComplatedTask, fetchMarkedTask } from "../../request/task"
 import { ITaskItem } from "../../types"
 
 type ActionType = 'todo' | 'done'
-type ChangeMark = (type: ActionType, item: ITaskItem) => void;
-type ChangeStatus = (type: ActionType, item: ITaskItem) => void;
+type ChangeMark = (item: ITaskItem) => void;
+type ChangeStatus = (item: ITaskItem) => void;
 
 const TaskItem: React.FC<{
   item: ITaskItem,
   changeMark: ChangeMark,
-  changeStatus: ChangeStatus,
+  changeComplateStatus: ChangeStatus,
   type: ActionType
-}> = ({ item, changeStatus, changeMark, type }) => {
+}> = ({ item, changeComplateStatus, changeMark, type }) => {
 
   const changeTaskItemStatus = (item: ITaskItem) => {
-    changeStatus(type, item)
+    changeComplateStatus(item)
   }
+
   const changeTaskItemMark = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, item: ITaskItem) => {
     e.stopPropagation()
-    changeMark(type, item)
+    changeMark(item)
   }
 
   return <div
@@ -49,18 +50,50 @@ const TaskItem: React.FC<{
   </div>
 }
 
-const Content: React.FC<{ taskId: string }> = ({ taskId }) => {
+export interface ContentType {
+  getComplatedTask:()=>void,
+  total:number
+}
+
+
+const Content = forwardRef(({ taskId }: {taskId:string | number}, ref: Ref<ContentType>) => {
 
   const [toDoData, setToDoData] = useState<ITaskItem[]>([])
 
-  useEffect(() => {
-    fetchFilterTask({ taskId }).then(res => {
-      console.log(res)
+  const getFilterTask = () => {
+    fetchFilterTask({ taskId: String(taskId) }).then(res => {
+      console.log(res, "res")
       if (res.code == 200) {
-        setToDoData(res.data.data.unComplatedList)
-        setDoneData(res.data.data.isComplatedList)
+        setToDoData(res.data.unComplatedList)
+        setDoneData(res.data.complatedList)
       }
     })
+  }
+
+  const [allTotal,setAllTotal] =  useState(0)
+
+  const getComplatedTask = () => {
+    fetchComplatedTask().then(res => {
+      if (res.code == 200) {
+        setDoneData(res.data.tasks)
+        setAllTotal(res.data.total)
+      }
+    });
+  }
+  // 使用useImperativeHandle将方法暴露给父组件
+  useImperativeHandle(ref, () => ({
+    getComplatedTask,
+    total:allTotal
+  }));
+
+  useEffect(() => {
+
+    getFilterTask()
+
+    fetchMarkedTask().then(res => {
+      setDoneData(res.data.tasks)
+    })
+
   }, [taskId])
 
 
@@ -69,69 +102,19 @@ const Content: React.FC<{ taskId: string }> = ({ taskId }) => {
   const [isFold, setFold] = useState(false)
 
 
-  function setDataAndAction(type: ActionType) {
-    let temData: ITaskItem[] = [];
-    let action: React.Dispatch<React.SetStateAction<ITaskItem[]>>;
-    if (type == "todo") {
-      temData = toDoData;
-      action = setToDoData
-    } else {
-      temData = doneData
-      action = setDoneData
-    }
-    return {
-      type,
-      temData,
-      action
-    }
-  }
-
-
- 
-
-/**
- *
- * @description 根据 id 区分任务
- * @param {number} id
- * @param {ITaskItem[]} data
- * @return {*} 
- */
-// function filterDataById(id: number, data: ITaskItem[]) {
-//     let chosenData: ITaskItem[] = []
-//     let filterData: ITaskItem[] = []
-//     data.forEach(item => {
-//       if (item._id == id) {
-//         chosenData.push(item)
-//       } else {
-//         filterData.push(item)
-//       }
-//     })
-//     return {
-//       chosenData,
-//       filterData
-//     }
-//   }
-
-  function setStatus(type: ActionType, K: 'isMarked' | 'isComplated', chosenItem: ITaskItem) {
-    // if (type == 'todo') {
-    //   const { chosenData, filterData } = filterDataById(chosenItem._id, toDoData)
-    //   setToDoData(filterData)
-    //   setDoneData([...doneData, ...chosenData])
-    // } else {
-    //   const { chosenData, filterData } = filterDataById(chosenItem._id, doneData)
-    //   setDoneData(filterData)
-    //   setToDoData([...toDoData, ...chosenData])
-    // }
-  }
-
-
-  const changeStatus = (type: ActionType, chosenItem: ITaskItem) => {
-    setStatus(type, "isComplated", chosenItem)
-  }
-
   const changeMark = (chosenItem: ITaskItem) => {
-    fetchChangeTaskComplated({id:chosenItem._id,isComplated:!chosenItem.isComplated}).then(res=>{
-      console.log(res)
+    fetchChangeTaskMarked({ id: chosenItem._id, isMarked: !chosenItem.isMarked }).then(res => {
+      if (res.code == 200) {
+        getFilterTask()
+      }
+    })
+  }
+
+  const changeComplateStatus = (chosenItem: ITaskItem) => {
+    fetchChangeTaskComplated({ id: chosenItem._id, isComplated: !chosenItem.isComplated }).then(res => {
+      if (res.code == 200) {
+        getFilterTask()
+      }
     })
   }
   const [taskName, setTaskName] = useState('')
@@ -144,6 +127,7 @@ const Content: React.FC<{ taskId: string }> = ({ taskId }) => {
         taskId
       }).then(res => {
         if (res.code == 200) {
+          getFilterTask()
           setTaskName('')
         }
       })
@@ -163,12 +147,13 @@ const Content: React.FC<{ taskId: string }> = ({ taskId }) => {
             return <TaskItem
               type="todo"
               key={item._id}
-              changeMark={()=>changeMark(item)}
-              changeStatus={changeStatus}
+              changeMark={() => changeMark(item)}
+              changeComplateStatus={() => changeComplateStatus(item)}
               item={item} />
           })
         }
         {/* 中间的箭头 */}
+        {allTotal}
         <div className="mt-4">
           <div className="inline-flex px-4 py-1 rounded-md justify-between items-center  hover:cursor-pointer
           bg-[#d0d6ee]
@@ -189,8 +174,8 @@ const Content: React.FC<{ taskId: string }> = ({ taskId }) => {
               return <TaskItem
                 type="done"
                 key={item._id}
-                changeMark={()=>changeMark(item)}
-                changeStatus={changeStatus}
+                changeMark={() => changeMark(item)}
+                changeComplateStatus={() => changeComplateStatus(item)}
                 item={item} />
             })
           }
@@ -204,6 +189,6 @@ const Content: React.FC<{ taskId: string }> = ({ taskId }) => {
       </footer>
     </div>
   )
-}
+})
 
 export default Content

@@ -1,41 +1,47 @@
-
-import { Layout, Divider, List, Skeleton } from "antd"
-import Header from "./components/header"
-import SideItem from "./components/item"
-import { StarOutlined, AlertOutlined, PlusOutlined, StarTwoTone, CalendarTwoTone } from "@ant-design/icons"
-import { useEffect, useRef, useState } from "react"
-import Content from "./components/main"
-import { useRequest } from 'ahooks'
-import Mock from 'mockjs';
-import React from "react"
-import { fetchAddTaskItem, fetchInfo, fetchSearchTaskItem, fetchUpdateTaskItem } from "../request/user"
-import { InfoResponse, ISideItem } from "../types"
-import Search from "antd/es/input/Search"
+import { Layout, Divider, List, Skeleton } from "antd";
+import Header from "./components/header";
+import SideItem from "./components/item";
 import {
-  CSSTransition,
-  TransitionGroup,
-} from 'react-transition-group';
-import { fetchFilterTask } from "../request/task"
+  StarOutlined,
+  AlertOutlined,
+  PlusOutlined,
+  StarTwoTone,
+  CalendarTwoTone,
+  HeartOutlined,
+  HeartTwoTone,
+} from "@ant-design/icons";
+import { useEffect, useRef, useState } from "react";
+import Content, { ContentType } from "./components/main";
+import { useRequest } from "ahooks";
+import Mock from "mockjs";
+import React from "react";
+import {
+  fetchAddTaskItem,
+  fetchInfo,
+  fetchSearchTaskItem,
+  fetchUpdateTaskItem,
+} from "../request/user";
+import { InfoResponse, ISideItem } from "../types";
+import Search from "antd/es/input/Search";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { fetchComplatedTask, fetchFilterTask } from "../request/task";
 function Home() {
-
-
-  const [info, setInfo] = useState<InfoResponse['data']>()
-
+  const [info, setInfo] = useState<InfoResponse["data"]>();
 
   function getInfo() {
     fetchInfo().then(res => {
       if (res) {
-        setInfo(res.data)
-        setSideTodoList(res.data.taskList)
+        setInfo(res.data);
+        setSideTodoList(res.data.taskList);
       }
-    })
+    });
   }
   useEffect(() => {
-    getInfo()
-  }, [])
+    getInfo();
+  }, []);
 
   const [sideTodoList, setSideTodoList] = useState<ISideItem[]>([]);
-  const index = useRef(0)
+  const index = useRef(0);
   const addList = () => {
     let o = {
       id: Date.now(),
@@ -43,87 +49,117 @@ function Home() {
       num: 0,
     };
     fetchAddTaskItem(o).then(res => {
-      setSideTodoList([...res.data])
-    })
-  }
+      setSideTodoList([...res.data]);
+    });
+  };
 
- 
- 
-
-  const updateItemTxt = (id: string | number | undefined, txt: string | undefined) => {
-    let temp = sideTodoList.find(item => item.id == id)
+  const updateItemTxt = (
+    id: string | number | undefined,
+    txt: string | undefined
+  ) => {
+    let temp = sideTodoList.find(item => item.id == id);
     temp && (temp.txt = txt);
     fetchUpdateTaskItem(temp).then(res => {
-      setSideTodoList(res.data)
-    })
-  }
+      setSideTodoList(res.data);
+    });
+  };
 
   const onSearch = (taskName: string) => {
     fetchSearchTaskItem({ taskName }).then(res => {
-      setSideTodoList(res.data)
-    })
+      setSideTodoList(res.data);
+    });
   };
 
   /** 侧边选中item */
-  const [chosenId,setChosenId] = useState('')
-  const chooseItem = (chosenId: any) => {
-    setChosenId(chosenId)
-   
-  }
+  const [chosenId, setChosenId] = useState<number>(0);
+  const chooseItem = (chosenId: number) => {
+    setChosenId(chosenId);
+  };
 
-  return <div className="h-full flex">
-    <div
-      className="w-30 bg-[#f4f4f4] py-5 px-4 relative"
-    >
-      {info?._id && <Header
-        changeInfo={getInfo}
-        info={info}></Header>}
-      <Search placeholder="input search text"
-        size="large"
-        allowClear
-        onSearch={onSearch}
-      />
-      <Divider className="my-4 border-t-1 border-gray-600"></Divider>
-      <div>
-        <SideItem txt={'重要'} icon={<StarTwoTone />}
+  const [complatedData, setComplatedData] = useState<any>({});
+  const [markedData, setMarkedData] = useState<any>({});
+  const contentRef = useRef<ContentType>(null);
+  useEffect(() => {
+    console.log(contentRef.current?.total);
+  }, [contentRef.current?.total]);
+  const [total, setTotal] = useState(0);
+  const onClickHandleComplate = () => {
+    console.log(contentRef.current?.getComplatedTask());
+    contentRef.current?.total && setTotal(contentRef.current?.total);
+  };
+
+  return (
+    <div className="h-full flex">
+      <div className="w-30 bg-[#f4f4f4] py-5 px-4 relative">
+        {info?._id && <Header changeInfo={getInfo} info={info}></Header>}
+        <Search
+          placeholder="input search text"
+          size="large"
+          allowClear
+          onSearch={onSearch}
+        />
+        <Divider className="my-4 border-t-1 border-gray-600"></Divider>
+        <div>
+          <div
+            className="
+                flex   
+                items-center py-2  rounded-sm
+                transition-all
+                duration-150
+                hover:bg-gray-300
+                hover:cursor-pointer
+                bg-gray-100
+                mt-2
+                h-12
+              "
+            // style={{ backgroundColor: chosenId == id ? 'rgb(243 244 246)' : "rgb(191,219,254)" }}
+            onClick={onClickHandleComplate}>
+            <div className="w-[4px] h-4/5 mr-2 bg-blue-300 rounded-md"></div>
+            <div className="flex items-center">
+              <HeartTwoTone />
+              <p className="ml-4">完成</p>
+            </div>
+            <span className="bg-gray-200 ml-auto mr-2 rounded-full flex items-center justify-center w-6 font-thin aspect-square">
+              {contentRef.current?.total}
+            </span>
+          </div>
+
+          {/* <SideItem txt={'标记'} icon={<HeartTwoTone />}
           id={1}
-          onClick={chooseItem}
+          onClick={(item)=>chooseItem(item)}
           chosenId={'0'}
+          notInput
           num={10} />
 
-        <SideItem txt={'重要'}
+        <SideItem txt={'完成'}
           onClick={chooseItem}
           id={2}
+          notInput
           chosenId={'1'}
-          icon={<CalendarTwoTone />} num={10} />
-      </div>
-      <Divider className="my-4 border-t-1 border-gray-600"></Divider>
-      <div>
-
-        <TransitionGroup className="todo-list">
-          {sideTodoList?.map(side => (
-
-            <CSSTransition
-              key={side.id}
-              timeout={500}
-              classNames="translateY"
-            >
-              <SideItem
-                {...side}
-                chosenId={chosenId}
-                updateItemTxt={updateItemTxt}
-                onClick={chooseItem}
+          icon={<CalendarTwoTone />} num={10} /> */}
+        </div>
+        <Divider className="my-4 border-t-1 border-gray-600"></Divider>
+        <div>
+          <TransitionGroup className="todo-list">
+            {sideTodoList?.map(side => (
+              <CSSTransition
                 key={side.id}
-              />
-
-            </CSSTransition>
-          ))
-          }
-
-        </TransitionGroup>
-      </div>
-      <Divider className="my-4 border-t-1 border-gray-600"></Divider>
-      <div className="flex 
+                timeout={500}
+                classNames="translateY">
+                <SideItem
+                  {...side}
+                  chosenId={chosenId}
+                  updateItemTxt={updateItemTxt}
+                  onClick={chooseItem}
+                  key={side.id}
+                />
+              </CSSTransition>
+            ))}
+          </TransitionGroup>
+        </div>
+        <Divider className="my-4 border-t-1 border-gray-600"></Divider>
+        <div
+          className="flex 
           items-center 
          bg-[#f4f4f4] 
           absolute 
@@ -134,16 +170,16 @@ function Home() {
           hover:cursor-pointer
           hover:bg-gray-200
         "
-        onClick={addList}>
-        <PlusOutlined />
-        <span className="ml-2">新建列表</span>
+          onClick={addList}>
+          <PlusOutlined />
+          <span className="ml-2">新建列表</span>
+        </div>
+      </div>
+      <div className="flex-1">
+        <Content taskId={chosenId} ref={contentRef} />
       </div>
     </div>
-    <div className="flex-1">
-      <Content taskId={chosenId}></Content>
-    </div>
-  </div>
+  );
 }
 
-export default Home
-
+export default Home;

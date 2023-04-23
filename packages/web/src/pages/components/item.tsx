@@ -4,7 +4,7 @@ import { Input } from "antd"
 import { ISideItem } from "../../types"
 import type { InputRef } from 'antd';
 
-const SideItem: React.FC<ISideItem & {chosenId:string}> = ({ icon = <BulbTwoTone />, txt = '', num = 0, id, onClick: handleClick, updateItemTxt,chosenId }) => {
+const SideItem: React.FC<ISideItem & { chosenId: string | number, notInput?: boolean }> = ({ icon = <BulbTwoTone />, txt = '', num = 0, id, onClick: handleClick, updateItemTxt, chosenId, notInput = false }) => {
 
   const [status, setStatus] = useState(true)
   const inputRef = useRef<InputRef>(null)
@@ -33,8 +33,10 @@ const SideItem: React.FC<ISideItem & {chosenId:string}> = ({ icon = <BulbTwoTone
   }, [status])
 
   const onClick = () => {
-    setStatus(false)
-    id && handleClick(id)
+    handleClick(id)
+    if (!notInput) {
+      setStatus(false)
+    }
   }
 
   return (
@@ -49,7 +51,7 @@ const SideItem: React.FC<ISideItem & {chosenId:string}> = ({ icon = <BulbTwoTone
     mt-2
     h-12
     "
-    style={{backgroundColor: chosenId==id ?  'rgb(243 244 246)' : "rgb(191,219,254)"}}
+      style={{ backgroundColor: chosenId == id ? 'rgb(243 244 246)' : "rgb(191,219,254)" }}
       onClick={onClick}
     >
 

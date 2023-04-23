@@ -1,3 +1,4 @@
+import { HttpStatus } from '@nestjs/common';
 import { Injectable, NestInterceptor, CallHandler, ExecutionContext } from '@nestjs/common';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -9,7 +10,7 @@ export class TransformInterceptor implements NestInterceptor {
       map((data) => {
         return {
           data,
-          code: 200,
+          code: HttpStatus.OK,
           message: '请求成功',
         };
       }),
