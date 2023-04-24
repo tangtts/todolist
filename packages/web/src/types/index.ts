@@ -47,7 +47,6 @@ export interface ISideItem {
   num: number
   id:number
   updateItemTxt?:(id:ISideItem['id'],todo:ISideItem['txt'])=>void,
-  onClick:(id:ISideItem['id'],txt:ISideItem['txt'])=>void,
 }
 
 // 过滤任务

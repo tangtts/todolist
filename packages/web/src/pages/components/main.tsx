@@ -4,8 +4,7 @@ import React, { forwardRef, Ref, useEffect, useImperativeHandle, useRef, useStat
 import { fetchAddTask, fetchChangeTaskMarked, fetchFilterTask, fetchChangeTaskComplated, fetchComplatedTask, fetchMarkedTask, deleteOneTask } from "../../request/task"
 import { ITaskItem } from "../../types"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
-
-
+import { useAppDispatch, useAppSelector } from "../../hook"
 interface TaskItemContenxt {
   item: ITaskItem,
   changeMark: (item: ITaskItem) => void,
@@ -72,13 +71,14 @@ const TaskItem: React.FC<
 }
 
 export interface ContentType {
-  taskId: number
   getInfo: () => void,
-  chosenTxt: string
 }
 
 
-const Content: React.FC<ContentType> = ({ taskId, getInfo, chosenTxt }) => {
+const Content: React.FC<ContentType> = ({ getInfo }) => {
+  const dispatch = useAppDispatch();
+  const { sideTxt, chosenId: taskId } = useAppSelector(state => state.task)
+
   const [messageApi, contextHolder] = message.useMessage();
   const [toDoData, setToDoData] = useState<ITaskItem[]>([])
   const [allTotal, setAllTotal] = useState(0)
@@ -107,6 +107,7 @@ const Content: React.FC<ContentType> = ({ taskId, getInfo, chosenTxt }) => {
       }
     });
   }
+
 
 
 
@@ -169,19 +170,25 @@ const Content: React.FC<ContentType> = ({ taskId, getInfo, chosenTxt }) => {
     <>
       {contextHolder}
       <div className="bg-[#5f73c1] p-8 flex flex-col h-full rounded-md">
-        <header className="text-white text-2xl">{chosenTxt}</header>
+        <header className="text-white text-2xl">{sideTxt}</header>
         <main>
           {/* todoData */}
-          {
+          <TransitionGroup>   {
+
             toDoData.map(item => {
-              return <TaskItem
-                key={item._id}
-                deleteOneTask={getFilterTask}
-                changeMark={() => changeMark(item)}
-                changeComplateStatus={() => changeComplateStatus(item)}
-                item={item} />
+              return <CSSTransition
+                timeout={500}
+                classNames="toggleVisable"
+                key={item._id}>
+                <TaskItem
+                  deleteOneTask={getFilterTask}
+                  changeMark={() => changeMark(item)}
+                  changeComplateStatus={() => changeComplateStatus(item)}
+                  item={item} />
+              </CSSTransition>
             })
           }
+          </TransitionGroup>
           {/* 中间的箭头 */}
           <div className="mt-4">
             <div className="inline-flex px-4 py-1 rounded-md justify-between items-center  hover:cursor-pointer

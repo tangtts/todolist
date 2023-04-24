@@ -1,6 +1,6 @@
 import { Layout, Divider, List, Skeleton } from "antd";
 import Header from "./components/header";
-import SideItem from "./components/item";
+import SideItem from "./components/side";
 import {
   StarOutlined,
   AlertOutlined,
@@ -25,12 +25,14 @@ import { InfoResponse, ISideItem } from "../types";
 import Search from "antd/es/input/Search";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { fetchComplatedTask, fetchFilterTask } from "../request/task";
+import { useAppDispatch, useAppSelector } from "../hook";
+import { changeSideTxt } from "../store/taskSlice";
 function Home() {
   const [userInfo, setUserInfo] = useState<InfoResponse["data"]>();
   const [sideTodoList, setSideTodoList] = useState<ISideItem[]>([]);
   // 起始列表第一项
   const index = useRef(0);
-
+  const dispatch  =  useAppDispatch();
   /**
    * @description 获取用户信息
    */
@@ -76,8 +78,8 @@ function Home() {
     if ((txt === temp?.txt)) return;
     temp && (temp.txt = txt);
     fetchUpdateTaskItem(temp).then(res => {
+      dispatch(changeSideTxt(temp?.txt))
       setSideTodoList(res.data);
-      setChosenId(chosenId);
     });
   };
 
@@ -92,12 +94,10 @@ function Home() {
   };
 
   /** 侧边选中item */
-  const [chosenId, setChosenId] = useState<number>(0);
   const [chosenTxt, setChosenTxt] = useState<string>('');
-  const chooseItem = (chosenId: number,txt:string) => {
-    setChosenId(chosenId);
-    setChosenTxt(txt)
-  };
+
+  const {chosenId} =  useAppSelector(state=>state.task)
+
 
   const [total, setTotal] = useState(0);
   const onClickHandleComplate = () => {
@@ -118,16 +118,12 @@ function Home() {
         <div>
           <SideItem txt={'标记'} icon={<HeartTwoTone />}
             id={1}
-            onClick={chooseItem}
-            chosenId={'0'}
             notInput
             num={10} />
 
           <SideItem txt={'完成'}
-            onClick={chooseItem}
             id={2}
             notInput
-            chosenId={'1'}
             icon={<CalendarTwoTone />}
             num={10} />
         </div>
@@ -140,12 +136,9 @@ function Home() {
                 timeout={500}
                 classNames="translateY">
                 <SideItem
-                  {...side}
-                  chosenId={chosenId}
-                  updateItemTxt={updateItemTxt}
-                  onClick={chooseItem}
-                  key={side.id}
-                  getInfo={getInfo}
+                {...side}
+                updateItemTxt={updateItemTxt}
+                getInfo={getInfo}  
                 />
               </CSSTransition>
             ))}
@@ -170,7 +163,7 @@ function Home() {
         </div>
       </div>
       <div className="flex-1">
-        <Content taskId={chosenId} chosenTxt={chosenTxt} getInfo={getInfo} />
+        <Content  getInfo={getInfo} />
       </div>
     </div>
   );

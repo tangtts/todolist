@@ -4,8 +4,11 @@ import { ISideItem } from "../../types"
 import type { InputRef } from 'antd';
 import { Dropdown, Input, MenuProps } from "antd"
 import { deleteTaskList } from "../../request/task";
-const SideItem: React.FC<ISideItem & { chosenId: string | number, notInput?: boolean, getInfo?: Function }> = ({ icon = <BulbTwoTone />, txt = '', num = 0, id, onClick: handleClick, updateItemTxt, chosenId, notInput = false, getInfo }) => {
-
+import { useAppDispatch, useAppSelector } from "../../hook";
+import { changeSideTxt, setChosenId } from "../../store/taskSlice";
+const SideItem: React.FC<ISideItem & { notInput?: boolean, getInfo?: Function }> = ({ icon = <BulbTwoTone />, txt = '', num = 0, id, updateItemTxt, notInput = false, getInfo }) => {
+  const dispatch  =  useAppDispatch()
+  const {chosenId} = useAppSelector(state=>state.task)
   // 是否是state状态
   const [status, setStatus] = useState(true)
   const inputRef = useRef<InputRef>(null)
@@ -34,17 +37,18 @@ const SideItem: React.FC<ISideItem & { chosenId: string | number, notInput?: boo
 
   // 点击侧边向父组件抛出事件
   const onClick = () => {
-    handleClick(id, txt)
+    dispatch(setChosenId(id))
+    dispatch(changeSideTxt(txt))
   }
   const items: MenuProps['items'] = [
-    {
-      label: '删除',
-      key: '1',
-    },
     {
       label: '修改',
       key: '2',
     },
+    {
+      label: '删除',
+      key: '1',
+    }
   ];
 
   const handleMenuClick = (e) => {
@@ -56,7 +60,6 @@ const SideItem: React.FC<ISideItem & { chosenId: string | number, notInput?: boo
     }
     // 删除其中的一个列表
     deleteTaskList({ id }).then(res => {
-      console.log(res)
       if (res.code == 200) {
         getInfo?.()
       }
