@@ -43,11 +43,11 @@ export type UploadResponse = CommonResponse<{
 
 export interface ISideItem {
   icon?: React.ReactNode,
-  txt?: string,
-  num?: number
+  txt: string,
+  num: number
   id:number
   updateItemTxt?:(id:ISideItem['id'],todo:ISideItem['txt'])=>void,
-  onClick:(id:ISideItem['id'])=>void,
+  onClick:(id:ISideItem['id'],txt:ISideItem['txt'])=>void,
 }
 
 // 过滤任务

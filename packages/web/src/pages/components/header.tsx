@@ -1,6 +1,6 @@
 import { Avatar, Button, Drawer, DrawerProps, Form, Input, Modal, RadioChangeEvent, Space } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { fetchInfo, fetchSearchTaskItem, fetchUpdateUser } from '../../request/user';
+import {  fetchSearchTaskItem, fetchUpdateUser } from '../../request/user';
 import { InfoResponse, UpdateParams, UploadResponse } from '../../types';
 import { CustomerUpload } from './upload';
 import { LockOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';

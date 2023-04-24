@@ -55,3 +55,25 @@
   transform: translateY(100px);
   transition: opacity transform 500ms ease-in;
 }
+
+.toggleVisable-enter {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+.toggleVisable-enter-active {
+  opacity: 1;
+  transform: translateY(0%);
+}
+.toggleVisable-exit {
+  opacity: 1;
+  transform: translateX(0%);
+}
+.toggleVisable-exit-active {
+  opacity: 0;
+
+  transform: translateX(50%);
+}
+.toggleVisable-enter-active,
+.toggleVisable-exit-active {
+  transition: opacity 500ms, transform 500ms;
+}

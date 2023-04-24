@@ -19,5 +19,6 @@ export namespace TaskUrl{
   export const changeTaskComplatedUrl =  'task/toggleComplate'
   export const getComplatedUrl =  'task/getAllComplated'
   export const getAllMarkedUrl =  'task/getAllMarked'
-  
+  export const deleteOneTaskUrl =  'task/deleteOneTask'
+  export const deleteTaskListUrl =  'task/deleteTaskList'
 }

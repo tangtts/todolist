@@ -22,6 +22,18 @@ export class TaskService {
     t.taskName = task.taskName;
     t.taskId = task.taskId;
     t.userId = id;
+    let u = await this.userRepository.findOneBy({ _id: ObjectId(id) });
+    u.taskList = u.taskList.map(item => {
+      if (item.id == task.taskId) {
+        return {
+          ...item,
+          num: item.num + 1,
+        };
+      } else {
+        return item;
+      }
+    });
+    await this.userRepository.update(id, { taskList: u.taskList });
     let r = await this.taskRepository.save(t);
     return;
   }
@@ -119,5 +131,18 @@ export class TaskService {
       tasks,
       total: count,
     };
+  }
+
+  async deleteOneTask(id: string) {
+    const r = await this.taskRepository.findOneAndDelete({ _id: ObjectId(id) });
+    return r.ok;
+  }
+
+  async deleteTaskList(userId, id: string) {
+    const r = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
+    r.taskList = r.taskList.filter(task => task.id != id);
+    let r1 = await this.userRepository.update(userId, { taskList: r.taskList });
+    console.log(r1);
+    return 123;
   }
 }

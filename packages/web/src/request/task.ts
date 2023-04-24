@@ -47,5 +47,23 @@ export function fetchMarkedTask(){
   })
 }
 
+export function deleteOneTask(data){
+  return requset<any>({
+    url:TaskUrl.deleteOneTaskUrl,
+    method:"Post",
+    data
+  })
+}
+
+
+export function deleteTaskList(data){
+  return requset<any>({
+    url:TaskUrl.deleteTaskListUrl,
+    method:"Post",
+    data
+  })
+}
+
+  
 
 

@@ -26,22 +26,31 @@ import Search from "antd/es/input/Search";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { fetchComplatedTask, fetchFilterTask } from "../request/task";
 function Home() {
-  const [info, setInfo] = useState<InfoResponse["data"]>();
+  const [userInfo, setUserInfo] = useState<InfoResponse["data"]>();
+  const [sideTodoList, setSideTodoList] = useState<ISideItem[]>([]);
+  // 起始列表第一项
+  const index = useRef(0);
 
-  function getInfo() {
+  /**
+   * @description 获取用户信息
+   */
+  const getInfo = () => {
     fetchInfo().then(res => {
       if (res) {
-        setInfo(res.data);
+        setUserInfo(res.data);
         setSideTodoList(res.data.taskList);
       }
     });
   }
+
   useEffect(() => {
     getInfo();
   }, []);
 
-  const [sideTodoList, setSideTodoList] = useState<ISideItem[]>([]);
-  const index = useRef(0);
+
+  /**
+   * @description 新增列表
+   */
   const addList = () => {
     let o = {
       id: Date.now(),
@@ -53,17 +62,29 @@ function Home() {
     });
   };
 
+  /**
+   * @description 更新侧边文字
+   * @param {(string | number | undefined)} id
+   * @param {(string | undefined)} txt
+   */
   const updateItemTxt = (
-    id: string | number | undefined,
+    id: string | number,
     txt: string | undefined
   ) => {
+    if (!txt) return;
     let temp = sideTodoList.find(item => item.id == id);
+    if ((txt === temp?.txt)) return;
     temp && (temp.txt = txt);
     fetchUpdateTaskItem(temp).then(res => {
       setSideTodoList(res.data);
+      setChosenId(chosenId);
     });
   };
 
+  /**
+   * @description 根据 taskName 搜索
+   * @param {string} taskName
+   */
   const onSearch = (taskName: string) => {
     fetchSearchTaskItem({ taskName }).then(res => {
       setSideTodoList(res.data);
@@ -72,26 +93,21 @@ function Home() {
 
   /** 侧边选中item */
   const [chosenId, setChosenId] = useState<number>(0);
-  const chooseItem = (chosenId: number) => {
+  const [chosenTxt, setChosenTxt] = useState<string>('');
+  const chooseItem = (chosenId: number,txt:string) => {
     setChosenId(chosenId);
+    setChosenTxt(txt)
   };
 
-  const [complatedData, setComplatedData] = useState<any>({});
-  const [markedData, setMarkedData] = useState<any>({});
-  const contentRef = useRef<ContentType>(null);
-  useEffect(() => {
-    console.log(contentRef.current?.total);
-  }, [contentRef.current?.total]);
   const [total, setTotal] = useState(0);
   const onClickHandleComplate = () => {
-    console.log(contentRef.current?.getComplatedTask());
-    contentRef.current?.total && setTotal(contentRef.current?.total);
+
   };
 
   return (
     <div className="h-full flex">
       <div className="w-30 bg-[#f4f4f4] py-5 px-4 relative">
-        {info?._id && <Header changeInfo={getInfo} info={info}></Header>}
+        {userInfo?._id && <Header changeInfo={getInfo} info={userInfo}></Header>}
         <Search
           placeholder="input search text"
           size="large"
@@ -100,43 +116,20 @@ function Home() {
         />
         <Divider className="my-4 border-t-1 border-gray-600"></Divider>
         <div>
-          <div
-            className="
-                flex   
-                items-center py-2  rounded-sm
-                transition-all
-                duration-150
-                hover:bg-gray-300
-                hover:cursor-pointer
-                bg-gray-100
-                mt-2
-                h-12
-              "
-            // style={{ backgroundColor: chosenId == id ? 'rgb(243 244 246)' : "rgb(191,219,254)" }}
-            onClick={onClickHandleComplate}>
-            <div className="w-[4px] h-4/5 mr-2 bg-blue-300 rounded-md"></div>
-            <div className="flex items-center">
-              <HeartTwoTone />
-              <p className="ml-4">完成</p>
-            </div>
-            <span className="bg-gray-200 ml-auto mr-2 rounded-full flex items-center justify-center w-6 font-thin aspect-square">
-              {contentRef.current?.total}
-            </span>
-          </div>
+          <SideItem txt={'标记'} icon={<HeartTwoTone />}
+            id={1}
+            onClick={chooseItem}
+            chosenId={'0'}
+            notInput
+            num={10} />
 
-          {/* <SideItem txt={'标记'} icon={<HeartTwoTone />}
-          id={1}
-          onClick={(item)=>chooseItem(item)}
-          chosenId={'0'}
-          notInput
-          num={10} />
-
-        <SideItem txt={'完成'}
-          onClick={chooseItem}
-          id={2}
-          notInput
-          chosenId={'1'}
-          icon={<CalendarTwoTone />} num={10} /> */}
+          <SideItem txt={'完成'}
+            onClick={chooseItem}
+            id={2}
+            notInput
+            chosenId={'1'}
+            icon={<CalendarTwoTone />}
+            num={10} />
         </div>
         <Divider className="my-4 border-t-1 border-gray-600"></Divider>
         <div>
@@ -152,6 +145,7 @@ function Home() {
                   updateItemTxt={updateItemTxt}
                   onClick={chooseItem}
                   key={side.id}
+                  getInfo={getInfo}
                 />
               </CSSTransition>
             ))}
@@ -176,7 +170,7 @@ function Home() {
         </div>
       </div>
       <div className="flex-1">
-        <Content taskId={chosenId} ref={contentRef} />
+        <Content taskId={chosenId} chosenTxt={chosenTxt} getInfo={getInfo} />
       </div>
     </div>
   );

@@ -104,4 +104,26 @@ export default class TaskController {
     return this.taskService.getAllMarked(req.user.id);
   }
 
+  @ApiOperation({
+    summary: "删除某一项任务",
+  })
+  @ApiBearerAuth("JWT")
+  @UseGuards(AuthGuard)
+  @Post("deleteOneTask")
+  deleteOneTask(@Req() req: any,@Body() {id}) {
+    return this.taskService.deleteOneTask(id);
+  }
+
+  @ApiOperation({
+    summary: "删除某一组任务",
+  })
+  @ApiBearerAuth("JWT")
+  @UseGuards(AuthGuard)
+  @Post("deleteTaskList")
+  deleteTaskList(@Req() req: any,@Body() {id}) {
+    return this.taskService.deleteTaskList(req.user.id,id);
+  }
+
+
+
 }
