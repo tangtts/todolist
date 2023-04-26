@@ -5,7 +5,7 @@ import { fetchAddTask, fetchChangeTaskMarked, fetchFilterTask, fetchChangeTaskCo
 import { ITaskItem } from "../../types"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
 import { useAppDispatch, useAppSelector } from "../../hook"
-import { setSideNum } from "../../store/taskSlice"
+import { setMarkedNum, setSideNum } from "../../store/taskSlice"
 interface TaskItemContenxt {
   item: ITaskItem,
   changeMark: (item: ITaskItem) => void,
@@ -18,7 +18,7 @@ const TaskItem: React.FC<
   TaskItemContenxt
 > = ({ item, changeComplateStatus, changeMark, deleteOneTask: deleteOne, getInfo }) => {
 
-  const { sideNum } = useAppSelector(state => state.task)
+  const { chosenId } = useAppSelector(state => state.task)
   const items: MenuProps['items'] = [
     {
       label: '删除',
@@ -27,21 +27,23 @@ const TaskItem: React.FC<
   ];
 
   function checkShouldOperate() {
-    return sideNum == 1
+    return chosenId == 1
   }
 
   const changeTaskItemStatus = (item: ITaskItem) => {
+    if (checkShouldOperate()) return
     changeComplateStatus(item)
   }
 
   const changeTaskItemMark = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, item: ITaskItem) => {
+    if (checkShouldOperate()) return
     e.stopPropagation()
     changeMark(item)
   }
 
 
   const handleMenuClick = () => {
-    console.log(132)
+    if (checkShouldOperate()) return
     deleteOneTask({ id: item._id }).then(res => {
       if (res.code == 200) {
         deleteOne()
@@ -52,9 +54,10 @@ const TaskItem: React.FC<
 
   return (
     <>
-      <Dropdown menu={{ items, onClick: handleMenuClick }} trigger={['contextMenu']}>
+      <Dropdown menu={{ items, onClick: handleMenuClick, disabled: checkShouldOperate() }} trigger={['contextMenu']}>
         <div
-          className="flex items-center 
+          className="flex 
+          items-center 
           hover:bg-white
             p-4 rounded-md 
             bg-[#eeeff3] 
@@ -101,7 +104,6 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
       if (res.code == 200) {
         setToDoData(res.data.unComplatedList)
         setDoneData(res.data.complatedList)
-        getComplatedTask()
       }
     })
   }
@@ -119,11 +121,28 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
     });
   }
 
-  // 根据 id 
+
+  /**
+   * @description 获取标记后的任务
+  */
+  const getMarkTask = () => {
+    fetchMarkedTask().then(res => {
+      if (res.code == 200) {
+        setDoneData(res.data.tasks)
+        dispatch(setMarkedNum(res.data.tasks.length))
+      }
+    });
+  }
+
+
+
+  // 根据 id 和是否有过删除 进行筛选
   useEffect(() => {
     if (taskId == 1) {
       getComplatedTask()
-    } else {
+    } else if(taskId == 2) {
+      getMarkTask()
+    }else {
       getFilterTask()
     }
   }, [taskId, hasDeleteSide])
@@ -136,7 +155,12 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
     getInfo()
   }, [doneData, toDoData])
 
+  // 在标记的时候不需要使用动画
+  const [useAnimate, setUseAnimate] = useState<boolean>(true)
+
+  // 标记切换
   const changeMark = (chosenItem: ITaskItem) => {
+    setUseAnimate(false)
     fetchChangeTaskMarked({ id: chosenItem._id, isMarked: !chosenItem.isMarked }).then(res => {
       if (res.code == 200) {
         getFilterTask()
@@ -145,10 +169,10 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
   }
 
   const changeComplateStatus = (chosenItem: ITaskItem) => {
+    setUseAnimate(true)
     fetchChangeTaskComplated({ id: chosenItem._id, isComplated: !chosenItem.isComplated }).then(res => {
       if (res.code == 200) {
         getFilterTask()
-        getComplatedTask()
       }
     })
   }
@@ -192,7 +216,7 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
             toDoData.map(item => {
               return <CSSTransition
                 timeout={500}
-                classNames="toggleVisable"
+                classNames={useAnimate ? 'toggleVisable' : ''}
                 key={item._id}>
                 <TaskItem
                   getInfo={getInfo}
@@ -225,7 +249,7 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
                   return (
                     <CSSTransition
                       timeout={500}
-                      classNames="toggleVisable"
+                      classNames={useAnimate ? 'toggleVisable' : ''}
                       key={item._id}>
                       <TaskItem
                         getInfo={getInfo}

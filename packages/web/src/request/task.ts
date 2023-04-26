@@ -43,7 +43,7 @@ export function fetchComplatedTask(){
 
 export function fetchMarkedTask(){
   return requset<any>({
-    url:TaskUrl.getComplatedUrl
+    url:TaskUrl.getAllMarkedUrl
   })
 }
 

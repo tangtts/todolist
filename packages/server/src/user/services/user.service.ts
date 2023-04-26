@@ -17,11 +17,14 @@ import { JwtService } from "@nestjs/jwt";
 import { UploadService } from "src/shared/upload/upload.service";
 import { deleteProperty } from "src/shared/utils/deleteNoUserdProperty";
 import { TaskItemDTO } from "../dtos/task-item.dto";
+import { TaskEntity } from "../entities/task.entity";
 @Injectable()
 export default class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: MongoRepository<UserEntity>,
+    @InjectRepository(TaskEntity)
+    private readonly taskRepository: MongoRepository<TaskEntity>,
     private readonly jwtService: JwtService,
     private readonly uploadService: UploadService
   ) {}
@@ -78,6 +81,26 @@ export default class UserService {
       return new NotFoundException("用户不存在！");
     }
     const user = await this.userRepository.findOneBy(id);
+
+    //始终为 1
+    const pipeline = [
+      { $match: { _id: user._id } },
+      { $unwind: '$taskList' },
+      { $lookup: { from: 'task', localField: 'taskList.id', foreignField: '_id', as: 'task' } },
+      { $addFields: { isComplatedCount: { $sum: { $cond: ['$task.isComplated', 1, 0] } } } },
+      { $group: { 
+        _id: '$_id', 
+        taskList: { $push: '$taskList' }, 
+        isComplatedCount: { $first: '$isComplatedCount' },
+        nickName:{ $first: '$nickName' },
+        password:{ $first: '$password' },
+        avatar:{ $first: '$avatar' },
+        phoneNumber:{$first: '$phoneNumber'}
+       }}
+    ];
+   let [result] =  await this.userRepository.aggregate(pipeline).toArray();
+
+
     return user;
   }
 

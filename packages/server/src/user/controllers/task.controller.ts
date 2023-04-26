@@ -71,7 +71,7 @@ export default class TaskController {
     @Req() req: any,
     @Body() task: { id: string; isComplated: boolean }
   ) {
-    return this.taskService.toggleComplate(task);
+    return this.taskService.toggleComplate(req.user.id,task);
   }
 
   @ApiOperation({

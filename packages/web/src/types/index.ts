@@ -28,6 +28,7 @@ export type InfoResponse = CommonResponse<{
   avatar:string,
   phoneNumber:string,
   id:number,
+  isComplatedCount:number
   taskList:Omit<ISideItem,'updateItemTxt'>[]
 }>
 

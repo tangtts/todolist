@@ -33,7 +33,7 @@ function Home() {
   // 起始列表第一项
   const index = useRef(0);
   const dispatch  =  useAppDispatch();
-  const {sideNum} = useAppSelector(state=>state.task)
+  const {sideNum,markedNum} = useAppSelector(state=>state.task)
   /**
    * @description 获取用户信息
    */
@@ -116,14 +116,14 @@ function Home() {
             id={1}
             notInput
             icon={<CalendarTwoTone />}
-            num={sideNum} />
+            num={userInfo?.isComplatedCount ?? 0} />
 
           <SideItem 
             txt={'标记'} 
             icon={<HeartTwoTone />}
             id={2}
             notInput
-            num={sideNum} />
+            num={markedNum} />
 
         </div>
         <Divider className="my-4 border-t-1 border-gray-600"></Divider>

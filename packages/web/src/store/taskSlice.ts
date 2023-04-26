@@ -4,13 +4,15 @@ export interface CounterState {
   sideTxt: string;
   chosenId:number,
   hasDeleteSide:boolean,
-  sideNum:number
+  sideNum:number,
+  markedNum:number
 }
 const initialState: CounterState = {
   sideTxt: "",
   chosenId:0,
   hasDeleteSide:false,
-  sideNum:0
+  sideNum:0,
+  markedNum:0
 };
 
 export const TaskSlice = createSlice({
@@ -28,10 +30,13 @@ export const TaskSlice = createSlice({
     },
     setSideNum(state, { payload }){
       state.sideNum = payload
+    },
+    setMarkedNum(state, { payload }){
+      state.markedNum = payload
     }
   },
 });
 
-export const { changeSideTxt,setChosenId,deleteSide,setSideNum } = TaskSlice.actions;
+export const { changeSideTxt,setChosenId,deleteSide,setSideNum,setMarkedNum } = TaskSlice.actions;
 
 export default TaskSlice.reducer;

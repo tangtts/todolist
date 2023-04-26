@@ -23,7 +23,7 @@ export class TaskEntity extends CommonEntity {
   // 是否完成
   @Column("boolean")
   isComplated: boolean;
-
+  
   // 是否被标记
   @Column("boolean")
   isMarked: boolean;
