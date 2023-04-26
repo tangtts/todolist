@@ -26,13 +26,14 @@ import Search from "antd/es/input/Search";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import { fetchComplatedTask, fetchFilterTask } from "../request/task";
 import { useAppDispatch, useAppSelector } from "../hook";
-import { changeSideTxt } from "../store/taskSlice";
+import { changeSideTxt, setChosenId } from "../store/taskSlice";
 function Home() {
   const [userInfo, setUserInfo] = useState<InfoResponse["data"]>();
   const [sideTodoList, setSideTodoList] = useState<ISideItem[]>([]);
   // 起始列表第一项
   const index = useRef(0);
   const dispatch  =  useAppDispatch();
+  const {sideNum} = useAppSelector(state=>state.task)
   /**
    * @description 获取用户信息
    */
@@ -60,7 +61,11 @@ function Home() {
       num: 0,
     };
     fetchAddTaskItem(o).then(res => {
-      setSideTodoList([...res.data]);
+      if(res.code == 200){
+        dispatch(setChosenId(res.data.id))
+        dispatch(changeSideTxt(res.data.txt))
+        getInfo()
+      }
     });
   };
 
@@ -93,16 +98,6 @@ function Home() {
     });
   };
 
-  /** 侧边选中item */
-  const [chosenTxt, setChosenTxt] = useState<string>('');
-
-  const {chosenId} =  useAppSelector(state=>state.task)
-
-
-  const [total, setTotal] = useState(0);
-  const onClickHandleComplate = () => {
-
-  };
 
   return (
     <div className="h-full flex">
@@ -116,16 +111,20 @@ function Home() {
         />
         <Divider className="my-4 border-t-1 border-gray-600"></Divider>
         <div>
-          <SideItem txt={'标记'} icon={<HeartTwoTone />}
+        <SideItem 
+            txt={'已完成'}
             id={1}
             notInput
-            num={10} />
+            icon={<CalendarTwoTone />}
+            num={sideNum} />
 
-          <SideItem txt={'完成'}
+          <SideItem 
+            txt={'标记'} 
+            icon={<HeartTwoTone />}
             id={2}
             notInput
-            icon={<CalendarTwoTone />}
-            num={10} />
+            num={sideNum} />
+
         </div>
         <Divider className="my-4 border-t-1 border-gray-600"></Divider>
         <div>

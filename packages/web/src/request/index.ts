@@ -7,9 +7,6 @@ export const AxiosInstance = axios.create({
   baseURL:"http://127.0.0.1:3000",
 })
 
-
-
-
 AxiosInstance.interceptors.request.use((config)=>{
   const token = localStorage.getItem('token');
   config.headers.Authorization = `Bearer ${token}`

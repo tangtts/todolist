@@ -1,7 +1,7 @@
 import { TaskEntity } from "./../entities/task.entity";
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { getMongoRepository, MongoRepository } from "typeorm";
+import {  MongoRepository } from "typeorm";
 import { TodoDTO } from "../dtos/todo.dto";
 import { UserEntity } from "../entities/user.entity";
 import { ObjectId } from "mongodb";
@@ -75,6 +75,7 @@ export class TaskService {
       { _id: ObjectId(id) },
       { isComplated }
     );
+    
     return r.affected;
   }
 
@@ -133,16 +134,33 @@ export class TaskService {
     };
   }
 
-  async deleteOneTask(id: string) {
-    const r = await this.taskRepository.findOneAndDelete({ _id: ObjectId(id) });
-    return r.ok;
+  async deleteOneTask(userId:string,id: string) {
+    // 先找到这个id，更新 user 表中的 数量
+    // 然后才能删除
+    const r = await this.taskRepository.findOneBy({ _id: ObjectId(id) });
+    let u = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
+  r && (u.taskList = u.taskList.map(item => {
+      if (item.id == r.taskId) {
+        return {
+          ...item,
+          num: item.num - 1,
+        };
+      } else {
+        return item;
+      }
+    }));
+    await this.userRepository.update(userId, { taskList: u.taskList });
+    await this.taskRepository.findOneAndDelete({ _id: ObjectId(id) })
+    return;
   }
 
-  async deleteTaskList(userId, id: string) {
+  async deleteTaskList(userId, taskId: string) {
     const r = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
-    r.taskList = r.taskList.filter(task => task.id != id);
+    r.taskList = r.taskList.filter(task => task.id != taskId);
+
     let r1 = await this.userRepository.update(userId, { taskList: r.taskList });
-    console.log(r1);
-    return 123;
+    // taskId 同步删除
+    let r2 = await this.taskRepository.deleteMany({taskId})
+    return ;
   }
 }

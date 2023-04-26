@@ -1,4 +1,4 @@
-import { LoginParmas, LoginResponse,InfoResponse, TaskListResponse, UpdateParams } from './../types/index';
+import { LoginParmas, LoginResponse,InfoResponse, TaskListResponse, UpdateParams, TaskResponse } from './../types/index';
 import  {UserUrl} from "./urls"
 import {requset} from ".";
 
@@ -28,7 +28,7 @@ export function fetchInfo(){
 }
 
 export function fetchAddTaskItem(data){
-  return requset<TaskListResponse>({
+  return requset<TaskResponse>({
     url:UserUrl.taskAddItemUrl,
     method:"Post",
     data

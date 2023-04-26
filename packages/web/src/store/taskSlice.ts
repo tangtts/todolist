@@ -2,11 +2,15 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export interface CounterState {
   sideTxt: string;
-  chosenId:number
+  chosenId:number,
+  hasDeleteSide:boolean,
+  sideNum:number
 }
 const initialState: CounterState = {
   sideTxt: "",
-  chosenId:0
+  chosenId:0,
+  hasDeleteSide:false,
+  sideNum:0
 };
 
 export const TaskSlice = createSlice({
@@ -18,10 +22,16 @@ export const TaskSlice = createSlice({
     },
     setChosenId:(state, { payload })=>{
       state.chosenId = payload;
+    },
+    deleteSide(state, { payload }){
+      state.hasDeleteSide = payload
+    },
+    setSideNum(state, { payload }){
+      state.sideNum = payload
     }
   },
 });
 
-export const { changeSideTxt,setChosenId } = TaskSlice.actions;
+export const { changeSideTxt,setChosenId,deleteSide,setSideNum } = TaskSlice.actions;
 
 export default TaskSlice.reducer;

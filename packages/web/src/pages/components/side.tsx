@@ -5,10 +5,10 @@ import type { InputRef } from 'antd';
 import { Dropdown, Input, MenuProps } from "antd"
 import { deleteTaskList } from "../../request/task";
 import { useAppDispatch, useAppSelector } from "../../hook";
-import { changeSideTxt, setChosenId } from "../../store/taskSlice";
+import { changeSideTxt, deleteSide, setChosenId } from "../../store/taskSlice";
 const SideItem: React.FC<ISideItem & { notInput?: boolean, getInfo?: Function }> = ({ icon = <BulbTwoTone />, txt = '', num = 0, id, updateItemTxt, notInput = false, getInfo }) => {
-  const dispatch  =  useAppDispatch()
-  const {chosenId} = useAppSelector(state=>state.task)
+  const dispatch = useAppDispatch()
+  const { chosenId } = useAppSelector(state => state.task)
   // 是否是state状态
   const [status, setStatus] = useState(true)
   const inputRef = useRef<InputRef>(null)
@@ -40,6 +40,7 @@ const SideItem: React.FC<ISideItem & { notInput?: boolean, getInfo?: Function }>
     dispatch(setChosenId(id))
     dispatch(changeSideTxt(txt))
   }
+  
   const items: MenuProps['items'] = [
     {
       label: '修改',
@@ -62,6 +63,8 @@ const SideItem: React.FC<ISideItem & { notInput?: boolean, getInfo?: Function }>
     deleteTaskList({ id }).then(res => {
       if (res.code == 200) {
         getInfo?.()
+        dispatch(deleteSide(true))
+        dispatch(changeSideTxt(''))
       }
     })
   }
@@ -83,18 +86,17 @@ const SideItem: React.FC<ISideItem & { notInput?: boolean, getInfo?: Function }>
         style={{ backgroundColor: chosenId == id ? 'rgb(96 165 250)' : "rgb(191,219,254)" }}
         onClick={onClick}
       >
-
         <div className="w-[4px] h-4/5 mr-2 bg-blue-300 rounded-md"></div>
         <div className="flex items-center">
           {icon}
           {
             status ? <p className="ml-4">{txt}</p>
-
               : <Input defaultValue={txt} onPressEnter={(e) => enter(e)} onBlur={(e) => blur(e)} ref={inputRef}></Input>
           }
 
         </div>
-        <span className="bg-gray-200 ml-auto mr-2 rounded-full flex items-center justify-center w-6 font-thin aspect-square">{num?.toString()}</span>
+        <span className="bg-gray-200 ml-auto mr-2 rounded-full flex items-center justify-center w-6 font-thin aspect-square">
+          {num}</span>
       </div>
     </Dropdown>
   </>

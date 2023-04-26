@@ -31,6 +31,9 @@ export type InfoResponse = CommonResponse<{
   taskList:Omit<ISideItem,'updateItemTxt'>[]
 }>
 
+export type TaskResponse = CommonResponse<Omit<ISideItem,'updateItemTxt'>
+>
+
 export type TaskListResponse = CommonResponse<Array<Omit<ISideItem,'updateItemTxt'>>
 >
 

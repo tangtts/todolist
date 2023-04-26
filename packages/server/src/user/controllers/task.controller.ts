@@ -111,7 +111,7 @@ export default class TaskController {
   @UseGuards(AuthGuard)
   @Post("deleteOneTask")
   deleteOneTask(@Req() req: any,@Body() {id}) {
-    return this.taskService.deleteOneTask(id);
+    return this.taskService.deleteOneTask(req.user.id,id);
   }
 
   @ApiOperation({

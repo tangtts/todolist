@@ -129,7 +129,7 @@ export default class UserService {
     todoItem.id = Date.now();
     findUser.taskList.push(todoItem);
     await this.update(id, findUser);
-    return findUser.taskList;
+    return todoItem;
   }
 
   /**

@@ -5,16 +5,30 @@ import { fetchAddTask, fetchChangeTaskMarked, fetchFilterTask, fetchChangeTaskCo
 import { ITaskItem } from "../../types"
 import { TransitionGroup, CSSTransition } from "react-transition-group"
 import { useAppDispatch, useAppSelector } from "../../hook"
+import { setSideNum } from "../../store/taskSlice"
 interface TaskItemContenxt {
   item: ITaskItem,
   changeMark: (item: ITaskItem) => void,
   changeComplateStatus: (item: ITaskItem) => void
   deleteOneTask: () => void,
+  getInfo: () => void
 }
 
 const TaskItem: React.FC<
   TaskItemContenxt
-> = ({ item, changeComplateStatus, changeMark, deleteOneTask: deleteOne }) => {
+> = ({ item, changeComplateStatus, changeMark, deleteOneTask: deleteOne, getInfo }) => {
+
+  const { sideNum } = useAppSelector(state => state.task)
+  const items: MenuProps['items'] = [
+    {
+      label: '删除',
+      key: '1',
+    },
+  ];
+
+  function checkShouldOperate() {
+    return sideNum == 1
+  }
 
   const changeTaskItemStatus = (item: ITaskItem) => {
     changeComplateStatus(item)
@@ -24,16 +38,14 @@ const TaskItem: React.FC<
     e.stopPropagation()
     changeMark(item)
   }
-  const items: MenuProps['items'] = [
-    {
-      label: '删除',
-      key: '1',
-    },
-  ];
+
+
   const handleMenuClick = () => {
+    console.log(132)
     deleteOneTask({ id: item._id }).then(res => {
       if (res.code == 200) {
         deleteOne()
+        getInfo()
       }
     })
   }
@@ -48,7 +60,7 @@ const TaskItem: React.FC<
             bg-[#eeeff3] 
             mt-2
             hover:cursor-pointer
-  "
+          "
           onClick={() => changeTaskItemStatus(item)}
         >
           {/* 左边的圆球 */}
@@ -76,21 +88,20 @@ export interface ContentType {
 
 
 const Content: React.FC<ContentType> = ({ getInfo }) => {
-  const dispatch = useAppDispatch();
-  const { sideTxt, chosenId: taskId } = useAppSelector(state => state.task)
+  const { sideTxt, chosenId: taskId, hasDeleteSide } = useAppSelector(state => state.task)
 
   const [messageApi, contextHolder] = message.useMessage();
   const [toDoData, setToDoData] = useState<ITaskItem[]>([])
-  const [allTotal, setAllTotal] = useState(0)
-
+  const dispatch = useAppDispatch()
   /**
-   * @description 根据id获取对应的 task
+   * @description 根据id获取对应的最新 task
    */
   const getFilterTask = () => {
     fetchFilterTask({ taskId: String(taskId) }).then(res => {
       if (res.code == 200) {
         setToDoData(res.data.unComplatedList)
         setDoneData(res.data.complatedList)
+        getComplatedTask()
       }
     })
   }
@@ -103,23 +114,27 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
     fetchComplatedTask().then(res => {
       if (res.code == 200) {
         setDoneData(res.data.tasks)
-        setAllTotal(res.data.total)
+        dispatch(setSideNum(res.data.tasks.length))
       }
     });
   }
 
-
-
-
+  // 根据 id 
   useEffect(() => {
-    getFilterTask()
-  }, [taskId])
-
-
+    if (taskId == 1) {
+      getComplatedTask()
+    } else {
+      getFilterTask()
+    }
+  }, [taskId, hasDeleteSide])
 
   const [doneData, setDoneData] = useState<ITaskItem[]>([])
   const [isFold, setFold] = useState(false)
 
+  //更改右边的数量
+  useEffect(() => {
+    getInfo()
+  }, [doneData, toDoData])
 
   const changeMark = (chosenItem: ITaskItem) => {
     fetchChangeTaskMarked({ id: chosenItem._id, isMarked: !chosenItem.isMarked }).then(res => {
@@ -133,6 +148,7 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
     fetchChangeTaskComplated({ id: chosenItem._id, isComplated: !chosenItem.isComplated }).then(res => {
       if (res.code == 200) {
         getFilterTask()
+        getComplatedTask()
       }
     })
   }
@@ -155,8 +171,6 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
         taskId
       }).then(res => {
         if (res.code == 200) {
-          // 更新任务列表的数量
-          getInfo()
           // 获取最新的任务列表
           getFilterTask()
           setTaskName('')
@@ -181,8 +195,10 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
                 classNames="toggleVisable"
                 key={item._id}>
                 <TaskItem
+                  getInfo={getInfo}
                   deleteOneTask={getFilterTask}
                   changeMark={() => changeMark(item)}
+
                   changeComplateStatus={() => changeComplateStatus(item)}
                   item={item} />
               </CSSTransition>
@@ -212,6 +228,7 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
                       classNames="toggleVisable"
                       key={item._id}>
                       <TaskItem
+                        getInfo={getInfo}
                         deleteOneTask={getFilterTask}
                         changeMark={() => changeMark(item)}
                         changeComplateStatus={() => changeComplateStatus(item)}
@@ -223,10 +240,13 @@ const Content: React.FC<ContentType> = ({ getInfo }) => {
             </TransitionGroup>
           </div>
         </main>
-        <footer className="mt-auto">
-          <Input size="large" value={taskName} onChange={(e) => setTaskName(e.target.value)}
-            onPressEnter={addTask}></Input>
-        </footer>
+        {
+          taskId != 1 && <footer className="mt-auto">
+            <Input size="large" value={taskName} onChange={(e) => setTaskName(e.target.value)}
+              onPressEnter={addTask}></Input>
+          </footer>
+        }
+
       </div>
     </>
   )
