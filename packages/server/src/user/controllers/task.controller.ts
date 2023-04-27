@@ -81,7 +81,7 @@ export default class TaskController {
   @UseGuards(AuthGuard)
   @Post("mark")
   mark(@Req() req: any, @Body() task: { id: string; isMarked: boolean }) {
-    return this.taskService.mark(task);
+    return this.taskService.toggleMark(req.user.id,task);
   }
 
   @ApiOperation({

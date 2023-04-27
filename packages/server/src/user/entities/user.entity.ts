@@ -41,7 +41,11 @@ export class UserEntity extends CommonEntity{
   taskList:TaskItemDTO[]
   
   @Column()
-  isComplatedCount:number
+  complatedCount:number
+
+  @Column()
+  markedCount:number
+
   @Column({
     select:false
   })

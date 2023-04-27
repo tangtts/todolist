@@ -80,13 +80,13 @@ export class TaskService {
     );
     let u = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
     if (isComplated) {
-      u.isComplatedCount = u.isComplatedCount + 1;
+      u.complatedCount = u.complatedCount + 1;
     } else {
-      u.isComplatedCount = u.isComplatedCount - 1;
+      u.complatedCount = u.complatedCount - 1;
     }
     let r1 = await this.userRepository.update(
       { _id: ObjectId(userId) },
-      { isComplatedCount: u.isComplatedCount }
+      { complatedCount: u.complatedCount }
     );
     return r.affected;
   }
@@ -98,7 +98,20 @@ export class TaskService {
    * @return {*}
    * @memberof TaskService
    */
-  async mark({ id, isMarked }: { id: string; isMarked: boolean }) {
+  async toggleMark(userId,{ id, isMarked }: { id: string; isMarked: boolean }) {
+
+
+    let u = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
+    if (isMarked) {
+      u.markedCount = u.markedCount + 1;
+    } else {
+      u.markedCount = u.markedCount - 1;
+    }
+    let r1 = await this.userRepository.update(
+      { _id: ObjectId(userId) },
+      { markedCount: u.markedCount }
+    );
+
     let r = await this.taskRepository.update(
       { _id: ObjectId(id) },
       { isMarked }
@@ -165,13 +178,11 @@ export class TaskService {
 
     await this.userRepository.update(userId, {
       taskList: u.taskList,
-      isComplatedCount: u.isComplatedCount - 1,
+      complatedCount:r.isComplated ? u.complatedCount - 1 :u.complatedCount ,
+      markedCount:r.isMarked ?  u.markedCount-1 : u.markedCount 
     });
     await this.taskRepository.findOneAndDelete({ _id: ObjectId(id) });
     return;
-
-
-
   }
 
   async deleteTaskList(userId, taskId: string) {
@@ -181,7 +192,8 @@ export class TaskService {
     let t = await this.taskRepository.findAndCountBy({ taskId });
     let r1 = await this.userRepository.update(userId, {
       taskList: r.taskList,
-      isComplatedCount: r.isComplatedCount - t.length,
+      complatedCount: r.complatedCount - t.length,
+      markedCount:r.markedCount - t.length
     });
 
     // taskId 同步删除

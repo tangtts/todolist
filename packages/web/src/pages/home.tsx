@@ -116,14 +116,14 @@ function Home() {
             id={1}
             notInput
             icon={<CalendarTwoTone />}
-            num={userInfo?.isComplatedCount ?? 0} />
+            num={userInfo?.complatedCount ?? 0} />
 
           <SideItem 
             txt={'标记'} 
             icon={<HeartTwoTone />}
             id={2}
             notInput
-            num={markedNum} />
+            num={userInfo?.markedCount ?? 0} />
 
         </div>
         <Divider className="my-4 border-t-1 border-gray-600"></Divider>

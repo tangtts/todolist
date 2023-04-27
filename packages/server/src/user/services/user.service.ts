@@ -83,24 +83,56 @@ export default class UserService {
     const user = await this.userRepository.findOneBy(id);
 
     //始终为 1
-    const pipeline = [
-      { $match: { _id: user._id } },
-      { $unwind: '$taskList' },
-      { $lookup: { from: 'task', localField: 'taskList.id', foreignField: '_id', as: 'task' } },
-      { $addFields: { isComplatedCount: { $sum: { $cond: ['$task.isComplated', 1, 0] } } } },
-      { $group: { 
-        _id: '$_id', 
-        taskList: { $push: '$taskList' }, 
-        isComplatedCount: { $first: '$isComplatedCount' },
-        nickName:{ $first: '$nickName' },
-        password:{ $first: '$password' },
-        avatar:{ $first: '$avatar' },
-        phoneNumber:{$first: '$phoneNumber'}
-       }}
-    ];
-   let [result] =  await this.userRepository.aggregate(pipeline).toArray();
-
-
+    //   const pipeline = [
+    //     { $match: { _id: user._id } },
+    //     { $unwind: '$taskList' },
+    //     { $lookup: { from: 'task', localField: 'taskList.id', foreignField: '_id', as: 'task' } },
+    //     { $addFields: { complatedCount: { $sum: { $cond: ['$task.isComplated', 1, 0] } } } },
+    //     { $group: {
+    //       _id: '$_id',
+    //       complatedCount: { $first: '$complatedCount' },
+    //       taskList: { $push: '$taskList' },
+    //       nickName:{ $first: '$nickName' },
+    //       password:{ $first: '$password' },
+    //       avatar:{ $first: '$avatar' },
+    //       phoneNumber:{$first: '$phoneNumber'}
+    //      }}
+    //   ];
+    //  let [result] =  await this.userRepository.aggregate(pipeline).toArray();
+    // const pipeline = [
+    //   {
+    //     $lookup: {
+    //       from: "taskDetails",
+    //       localField: "taskList.id",
+    //       foreignField: "taskId",
+    //       as: "tasks"
+    //     }
+    //   },
+    //   {
+    //     $unwind: "$tasks"
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 0,
+    //       isComplated: "$tasks.isComplated",
+    //       nickName: '$users.nickName'
+    //     }
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$_id",
+    //       complateCount: { $sum: { $cond: [ "$isComplated", 1, 0 ] } },
+    //       complatedCount: { $first: '$complatedCount' },
+    //       taskList: { $push: '$taskList' },
+    //       nickName:{ $first: '$users.nickName' },
+    //       password:{ $first: '$password' },
+    //       avatar:{ $first: '$avatar' },
+    //       phoneNumber:{$first: '$phoneNumber'}
+    //     }
+    //   }
+    // ]
+    // let [result] =  await this.userRepository.aggregate(pipeline).toArray();
+    // console.log("🚀 ~ file: user.service.ts:129 ~ UserService ~ info ~ result:", result);
     return user;
   }
 
@@ -121,7 +153,7 @@ export default class UserService {
     if (user.oldPassword) {
       // 判断老密码是否正确
       const oldEncrytPassword = encrytPassword(user.oldPassword, findUser.salt);
-      
+
       if (findUser.password !== oldEncrytPassword) {
         throw new UnauthorizedException("认证失败");
       }
