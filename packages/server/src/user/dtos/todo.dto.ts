@@ -2,7 +2,7 @@
 
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude, Transform } from "class-transformer";
-import { IsBoolean, IsDateString, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, Length, Matches, Validate} from "class-validator"
+import { IsBoolean, IsDateString, isNotEmpty, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsPhoneNumber, IsString, Length, Matches, Validate} from "class-validator"
 import { IsConfirmed } from "src/shared/rules/isSamePassword.rule";
 export class TodoDTO {
   @ApiProperty({example:false})
@@ -13,10 +13,11 @@ export class TodoDTO {
   @IsBoolean()
   isMarked:boolean = false
 
+  // 自己的id
   @ApiProperty({example:"0"})
-  @IsString()
-  @Transform((value)=>String(value))
-  taskId:string
+  // @Transform((value)=>Number(value))
+  @IsNumberString()
+  taskId:number
 
   @ApiProperty({example:"吃喝玩乐"})
   @IsString()

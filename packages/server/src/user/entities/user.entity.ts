@@ -1,3 +1,4 @@
+import { TaskEntity } from './task.entity';
 import { Exclude } from "class-transformer";
 import { CommonEntity } from "src/shared/entities/common.entiry";
 import {
@@ -12,42 +13,70 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   PrimaryColumn,
-  ObjectID
+  ObjectID,
+  OneToMany
 } from "typeorm";
 import { TaskItemDTO } from "../dtos/task-item.dto";
+import { TaskListEntity } from "./taskList.entity";
+
+
 @Entity('users')
 export class UserEntity extends CommonEntity{
 
-  @ObjectIdColumn()
-  _id: ObjectID;
+  @PrimaryGeneratedColumn()
+  userId: number;
 
   // 昵称
   @Column("text")
   nickName: string;
 
   // 手机号
-  @Column("text")
+  @Column({
+    type:"varchar",
+    length: 150,
+    unique: true,
+  })
   phoneNumber: string;
 
   //密码
-  @Column("text")
+  @Column({
+   type:"text"
+  })
   password: string;
 
   // 头像
-  @Column("text")
+  @Column({
+    type:"varchar",
+    default:""
+  })
   avatar:string
 
-  @Column({type: 'json', nullable: true})
-  taskList:TaskItemDTO[]
-  
-  @Column()
+  @JoinTable()
+  @OneToMany(()=>TaskListEntity,(task)=>task.user,{
+    // 会同步到taskList 中
+    cascade:true
+  })
+  taskList:TaskListEntity[]
+
+  @OneToMany(()=>TaskEntity,(task)=>task.userId,{
+    cascade:true
+  })
+ taskItemId:TaskEntity
+
+  @Column({
+    comment:"完成数量",
+    default:0
+  })
   complatedCount:number
 
-  @Column()
+  @Column({
+    comment:"标记数量",
+    default:0
+  })
   markedCount:number
 
   @Column({
-    select:false
+    // select:false
   })
   salt: string;
 }

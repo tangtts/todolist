@@ -1,3 +1,4 @@
+import { UpdateTodoDTO } from './../dtos/todo.update.dto';
 import { TaskItemDTO } from "./../dtos/task-item.dto";
 import { CreateUserDTO } from "./../dtos/create-user.dto";
 import {
@@ -48,8 +49,23 @@ export default class TaskController {
   @UseGuards(AuthGuard)
   @Post("add")
   add(@Req() req: any, @Body() task: TodoDTO) {
-    return this.taskService.addTask(req.user.id, task);
+    return this.taskService.addTask(task);
   }
+
+
+  @ApiOperation({
+    summary: "切换todo是否完成",
+  })
+  @ApiBearerAuth("JWT")
+  @UseGuards(AuthGuard)
+  @Post("changeStatus")
+  changeStatus(
+    @Req() req: any,
+    @Body() task: UpdateTodoDTO
+  ) {
+    return this.taskService.changeStatus(task);
+  }
+
 
   @ApiOperation({
     summary: "选择任务",
@@ -61,28 +77,6 @@ export default class TaskController {
     return this.taskService.filterTask(task);
   }
 
-  @ApiOperation({
-    summary: "切换todo是否完成",
-  })
-  @ApiBearerAuth("JWT")
-  @UseGuards(AuthGuard)
-  @Post("toggleComplate")
-  toggleComplate(
-    @Req() req: any,
-    @Body() task: { id: string; isComplated: boolean }
-  ) {
-    return this.taskService.toggleComplate(req.user.id,task);
-  }
-
-  @ApiOperation({
-    summary: "任务添加标记",
-  })
-  @ApiBearerAuth("JWT")
-  @UseGuards(AuthGuard)
-  @Post("mark")
-  mark(@Req() req: any, @Body() task: { id: string; isMarked: boolean }) {
-    return this.taskService.toggleMark(req.user.id,task);
-  }
 
   @ApiOperation({
     summary: "获取已经完成的所有任务",

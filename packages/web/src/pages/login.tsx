@@ -79,7 +79,7 @@ const Login: React.FC = () => {
             label="密码"
             name="password"
             rules={[
-              { type: "string", min: 3, max: 6,message:"密码长度必须在3位到6位之间" },
+              { type: "string", min: 3, max: 6, message: "密码长度必须在3位到6位之间" },
               { required: true, message: "请输入密码" },
             ]}>
             <Input.Password placeholder="请输入密码" className="h-12" prefix={<LockOutlined />} />
