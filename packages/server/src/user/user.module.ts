@@ -10,15 +10,17 @@ import { jwtSecret,jwtSignOptions } from "src/constants";
 import { UploadService } from "src/shared/upload/upload.service";
 import TaskController from "./controllers/task.controller";
 import { TaskEntity } from './entities/task.entity';
+import { TaskListEntity } from './entities/taskList.entity';
 @Module({
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([UserEntity,TaskEntity]),
+    TypeOrmModule.forFeature([UserEntity,TaskEntity,TaskListEntity]),
+
     JwtModule.register({
-      global: true,
       secret: jwtSecret,
       signOptions:jwtSignOptions,
     })
+
   ],
   controllers: [UserController,TaskController],
   providers:[UserService,UploadService,TaskService],

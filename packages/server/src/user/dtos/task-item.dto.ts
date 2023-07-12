@@ -1,20 +1,25 @@
-
-
 import { ApiHideProperty, ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
-import { IsDateString, isNotEmpty, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, Length, Matches, Validate} from "class-validator"
+import {
+  IsDateString,
+  isNotEmpty,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  Length,
+  Matches,
+  Validate,
+} from "class-validator";
 import { IsConfirmed } from "src/shared/rules/isSamePassword.rule";
 export class TaskItemDTO {
-
-  @IsNumber()
-  @ApiHideProperty()
-  id:string | number;
-
-  @ApiProperty({example:"任务1"})
+  @ApiProperty({ example: "任务1" })
   @IsNotEmpty()
-  txt:string
+  txt: string;
 
-  @IsNumber()
-  num:number
-
+  @ApiProperty({example:1})
+  @IsNotEmpty()
+  @IsOptional()
+  taskId:number
 }

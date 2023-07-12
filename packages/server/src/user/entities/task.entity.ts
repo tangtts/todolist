@@ -1,3 +1,4 @@
+import { UserEntity } from 'src/user/entities/user.entity';
 import { CommonEntity } from "src/shared/entities/common.entiry";
 import {
   Entity,
@@ -12,14 +13,21 @@ import {
   PrimaryGeneratedColumn,
   PrimaryColumn,
   ObjectID,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
 } from "typeorm";
+import { TaskListEntity } from "./taskList.entity";
 
 @Entity("taskDetails")
 export class TaskEntity extends CommonEntity {
+  @PrimaryGeneratedColumn()
+  taskItemId:number
 
   //任务名称
   @Column("text")
-  taskName: string;
+  taskItemName: string;
+
   // 是否完成
   @Column("boolean")
   isComplated: boolean;
@@ -29,10 +37,9 @@ export class TaskEntity extends CommonEntity {
   isMarked: boolean;
 
   //用户id
-  @Column("text")
-  userId: string;
+  @ManyToOne(()=>UserEntity,(user)=>user.taskItemId)
+  userId: number;
 
-  // 所属任务id
-  @Column("text")
-  taskId: string;
+  @ManyToOne(()=>TaskListEntity)
+  taskNameList:TaskListEntity
 }

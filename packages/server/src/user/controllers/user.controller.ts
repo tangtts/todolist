@@ -14,6 +14,7 @@ import {
   UseGuards,
   UseInterceptors,
   Request,
+  Query,
 } from "@nestjs/common";
 import {
   ApiBearerAuth,
@@ -33,6 +34,13 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { UploadDTO } from "../dtos/upload.dto";
 import { UpdateUserDTO } from "../dtos/update-user.dto";
 import { SearchUserDTO } from "../dtos/search-user.dto";
+
+
+import * as multer from "multer";
+import * as fs from 'fs';
+import * as path from "path";
+import { log } from "console";
+import { join } from "path";
 @ApiTags("用户模块")
 @Controller("user")
 export default class UserController {
@@ -65,7 +73,8 @@ export default class UserController {
   @Get("info")
   @UseGuards(AuthGuard)
   info(@Req() req: any) {
-    return this.userService.info(req.user.id);
+    const token = req.user.id;
+    return this.userService.info(token);
   }
 
   /**
@@ -80,11 +89,10 @@ export default class UserController {
   @ApiOperation({
     summary: "更新用户",
   })
-  @Post('update')
+  @Post("update")
   @UseGuards(AuthGuard)
   update(@Request() req, @Body() updateUserDTO: UpdateUserDTO) {
     const token = req.user.id;
-    // let  id: string = "643c0d94cd563ce5cc22455c";
     return this.userService.update(token, updateUserDTO);
   }
 
@@ -136,7 +144,7 @@ export default class UserController {
    */
   @ApiBearerAuth("JWT")
   @ApiOperation({
-    summary: "修改任务列表",
+    summary: "获取任务列表",
   })
   @Post("searchTaskItem")
   @UseGuards(AuthGuard)
@@ -149,13 +157,19 @@ export default class UserController {
     summary: "上传头像",
   })
   @ApiConsumes("multipart/form-data")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(
+    FileInterceptor("file",)
+  )
   @Post("upload")
   async upload(
     @Req() req: UploadDTO,
     @Body() uploadDTO: UploadDTO,
     @UploadedFile() file
   ) {
+  //   const a = path.join("")
+  // let r =  path.join(process.cwd(), "my-uploads") + req.file.filename
+  // console.log(r)
+  //   return req.file
     // console.log(req.file,"fa",uploadDTO.name)
     return await this.userService.uploadAvatar(file);
   }

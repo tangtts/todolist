@@ -1,3 +1,5 @@
+import { UpdateTodoDTO } from './../dtos/todo.update.dto';
+import { TaskListEntity } from './../entities/taskList.entity';
 import { TaskEntity } from "./../entities/task.entity";
 import { HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -12,30 +14,25 @@ export class TaskService {
     private readonly userRepository: MongoRepository<UserEntity>,
 
     @InjectRepository(TaskEntity)
-    private readonly taskRepository: MongoRepository<TaskEntity>
+    private readonly taskRepository: MongoRepository<TaskEntity>,
+
+    @InjectRepository(TaskListEntity)
+    private readonly taskListRepository: MongoRepository<TaskListEntity>
   ) {}
 
-  async addTask(id: string, task: TodoDTO) {
+  async addTask( task: TodoDTO):Promise<TaskEntity> {
     let t = new TaskEntity();
     t.isComplated = false;
     t.isMarked = false;
-    t.taskName = task.taskName;
-    t.taskId = task.taskId;
-    t.userId = id;
-    let u = await this.userRepository.findOneBy({ _id: ObjectId(id) });
-    u.taskList = u.taskList.map(item => {
-      if (item.id == task.taskId) {
-        return {
-          ...item,
-          num: item.num + 1,
-        };
-      } else {
-        return item;
-      }
+    t.taskItemName = task.taskName;
+    const taskList = await this.taskListRepository.findOne({
+      where:{ taskId:task.taskId },
+      relations:["taskItemList"]
     });
-    await this.userRepository.update(id, { taskList: u.taskList });
-    let r = await this.taskRepository.save(t);
-    return;
+
+    taskList.taskItemList.push(t)
+    await this.taskListRepository.save(taskList);
+    return t
   }
 
   async filterTask(task: { taskId: string }) {
@@ -44,13 +41,6 @@ export class TaskService {
     });
     const complatedList: TodoDTO[] = [];
     const unComplatedList: TodoDTO[] = [];
-    taskList.forEach(task => {
-      if (task.isComplated) {
-        complatedList.push(task);
-      } else {
-        unComplatedList.push(task);
-      }
-    });
     return {
       complatedList,
       unComplatedList,
@@ -64,59 +54,18 @@ export class TaskService {
    * @return {*}
    * @memberof TaskService
    */
-  async toggleComplate(
-    userId,
-    {
-      id,
-      isComplated,
-    }: {
-      id: string;
-      isComplated: boolean;
-    }
-  ) {
-    let r = await this.taskRepository.update(
-      { _id: ObjectId(id) },
-      { isComplated }
-    );
-    let u = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
-    if (isComplated) {
-      u.complatedCount = u.complatedCount + 1;
-    } else {
-      u.complatedCount = u.complatedCount - 1;
-    }
-    let r1 = await this.userRepository.update(
-      { _id: ObjectId(userId) },
-      { complatedCount: u.complatedCount }
-    );
-    return r.affected;
-  }
-
-  /**
-   *
-   * @description 标记
-   * @param {{ id: string; isMarked: boolean }} { id, isMarked }
-   * @return {*}
-   * @memberof TaskService
-   */
-  async toggleMark(userId,{ id, isMarked }: { id: string; isMarked: boolean }) {
-
-
-    let u = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
-    if (isMarked) {
-      u.markedCount = u.markedCount + 1;
-    } else {
-      u.markedCount = u.markedCount - 1;
-    }
-    let r1 = await this.userRepository.update(
-      { _id: ObjectId(userId) },
-      { markedCount: u.markedCount }
-    );
-
-    let r = await this.taskRepository.update(
-      { _id: ObjectId(id) },
-      { isMarked }
-    );
-    return r.affected;
+  async changeStatus(task: UpdateTodoDTO) {
+    let taskId  = task.taskId;
+    delete task.taskId
+    const a =await this.taskRepository.update(taskId,task)
+    let l =await this.taskListRepository.findOne({
+      where:{taskId:1},
+      relations:["taskItemList"]
+    });
+    l.taskItemList.forEach(item=>{
+      console.log(item.isComplated)
+    })
+    return a.affected == 1;
   }
 
   /**
@@ -164,20 +113,19 @@ export class TaskService {
     // 然后才能删除
     const r = await this.taskRepository.findOneBy({ _id: ObjectId(id) });
     let u = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
-    r &&
-      (u.taskList = u.taskList.map(item => {
-        if (item.id == r.taskId) {
-          return {
-            ...item,
-            num: item.num - 1,
-          };
-        } else {
-          return item;
-        }
-      }));
+    // r &&
+    //   (u.taskList = u.taskList.map(item => {
+    //     if (item.id == r.taskId) {
+    //       return {
+    //         ...item,
+    //         num: item.num - 1,
+    //       };
+    //     } else {
+    //       return item;
+    //     }
+    //   }));
 
     await this.userRepository.update(userId, {
-      taskList: u.taskList,
       complatedCount:r.isComplated ? u.complatedCount - 1 :u.complatedCount ,
       markedCount:r.isMarked ?  u.markedCount-1 : u.markedCount 
     });
@@ -187,11 +135,11 @@ export class TaskService {
 
   async deleteTaskList(userId, taskId: string) {
     const r = await this.userRepository.findOneBy({ _id: ObjectId(userId) });
-    r.taskList = r.taskList.filter(task => task.id != taskId);
+    // r.taskList = r.taskList.filter(task => task.id != taskId);
     // 根据taskId 查询数量
     let t = await this.taskRepository.findAndCountBy({ taskId });
     let r1 = await this.userRepository.update(userId, {
-      taskList: r.taskList,
+      // taskList: r.taskList,
       complatedCount: r.complatedCount - t.length,
       markedCount:r.markedCount - t.length
     });
