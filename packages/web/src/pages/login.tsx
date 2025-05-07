@@ -1,21 +1,20 @@
 import React from "react";
 import { Button, Typography, Col, Form, Input, Row } from "antd";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"
-// import a from ""
 import { LoginParmas } from "../types";
 import { fetchLogin } from "../request/user";
 import { AlertTwoTone, LockOutlined, UserOutlined } from "@ant-design/icons";
 const { Text, Link } = Typography;
-
+import { useSelector, useDispatch } from 'react-redux'
+import { setToken } from '../store/userSlice'
 const Login: React.FC = () => {
-
+  const dispatch = useDispatch()
   const navigate = useNavigate();
 
   const onFinish = (values: LoginParmas) => {
     fetchLogin(values).then(res => {
       if (res.code == 200) {
-        localStorage.setItem('token', res.data.token);
+        dispatch(setToken(res.data.token))
         navigate("/");
       }
     })
@@ -57,7 +56,7 @@ const Login: React.FC = () => {
           layout={"vertical"}
           initialValues={{
             phoneNumber: "18623816694",
-            password: "123456"
+            password: "1234565"
           }}
           className="w-full">
 
@@ -79,7 +78,7 @@ const Login: React.FC = () => {
             label="密码"
             name="password"
             rules={[
-              { type: "string", min: 3, max: 6,message:"密码长度必须在3位到6位之间" },
+              { type: "string", min: 3, max: 8, message: "密码长度必须在3位到8位之间" },
               { required: true, message: "请输入密码" },
             ]}>
             <Input.Password placeholder="请输入密码" className="h-12" prefix={<LockOutlined />} />
@@ -96,7 +95,6 @@ const Login: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
-
       </div>
     </div>
   );
